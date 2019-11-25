@@ -5,7 +5,9 @@ import sys
 from dynaconf import settings
 from telegram.ext import MessageHandler, Filters, Updater
 
+logging.basicConfig()
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def create_updater(token):
@@ -14,15 +16,16 @@ def create_updater(token):
 
 
 def main(args):
-    token = settings['TOKEN']
+    token = settings['token']
     updater = create_updater(token)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(spam_handler)
     updater.start_polling()
+    logger.info('Ready!')
 
 
 def anti_china_spam(update, context):
-    if not update.message.chat_id == settings['CHAT_ID']:
+    if not update.message.chat_id == settings['chat_id']:
         return
     username = update.message.from_user.first_name
     if re.fullmatch(r'[\u4e00-\u9fff]{3}', username):
