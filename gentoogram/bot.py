@@ -5,9 +5,8 @@ import sys
 from dynaconf import settings
 from telegram.ext import MessageHandler, Filters, Updater
 
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('bot')
 
 
 def create_updater(token):
