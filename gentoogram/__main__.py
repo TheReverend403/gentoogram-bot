@@ -1,12 +1,17 @@
 import logging
 import re
+import subprocess
 import sys
 
+import sentry_sdk
 from dynaconf import settings
 from telegram.ext import MessageHandler, Filters, Updater
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 logger = logging.getLogger('bot')
+
+version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
+sentry_sdk.init(settings['sentry_dsn'], release=version)
 
 
 def main(args):
