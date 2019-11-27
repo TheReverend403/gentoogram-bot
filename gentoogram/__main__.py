@@ -8,7 +8,7 @@ from dynaconf import settings
 from telegram.ext import MessageHandler, Filters, Updater
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
-logger = logging.getLogger('bot')
+log = logging.getLogger('bot')
 
 version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
 sentry_sdk.init(settings['sentry_dsn'], release=version)
@@ -20,17 +20,22 @@ def main(args):
     dispatcher = updater.dispatcher
     dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, anti_china_spam))
     updater.start_polling()
-    logger.info('Ready!')
+    log.info('Ready!')
 
 
 def anti_china_spam(update, context):
-    if not update.message.chat_id == settings['chat_id']:
+    message = update.message
+    chat = message.chat
+    user = message.from_user
+    name = user.first_name
+
+    if chat.id != settings['chat_id']:
         return
-    name = update.message.from_user.first_name
+
     if re.fullmatch(r'[\u4e00-\u9fff]{3}', name):
-        logger.info(f'{name} looks like a Chinese spam bot, kicking.')
-        update.message.chat.kick_chat_member(update.message.from_user.id)
-        update.message.delete()
+        log.info(f'{name} looks like a Chinese spam bot, kicking.')
+        chat.kick_chat_member(user.id)
+        message.delete()
 
 
 if __name__ == '__main__':
