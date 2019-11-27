@@ -34,7 +34,7 @@ def anti_china_spam(update, context):
 
     if re.fullmatch(r'[\u4e00-\u9fff]{3}', name):
         log.info(f'{name} looks like a Chinese spam bot, kicking.')
-        chat.kick_chat_member(user.id)
+        chat.kick_member(user.id)
         message.delete()
 
 
