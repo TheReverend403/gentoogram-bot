@@ -5,7 +5,7 @@ import sys
 
 import sentry_sdk
 from dynaconf import settings
-from telegram.error import Conflict, NetworkError
+from telegram.error import NetworkError, TelegramError
 from telegram.ext import MessageHandler, Filters, Updater
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
@@ -15,7 +15,7 @@ log = logging.getLogger('bot')
 def sentry_before_send(event, hint):
     if 'exc_info' in hint:
         exc_type, exc_value, tb = hint['exc_info']
-        if isinstance(exc_value, (Conflict, NetworkError)):
+        if isinstance(exc_value, (TelegramError, NetworkError)):
             return None
 
     return event
