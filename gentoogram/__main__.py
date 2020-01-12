@@ -5,7 +5,7 @@ import sys
 
 import sentry_sdk
 from dynaconf import settings
-from telegram.error import NetworkError, TelegramError
+from telegram.error import TelegramError, NetworkError
 from telegram.ext import MessageHandler, Filters, Updater
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
