@@ -11,7 +11,8 @@ from telegram.ext import MessageHandler, Filters, Updater
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 log = logging.getLogger('bot')
-base_dir = os.path.dirname(os.path.abspath(__file__))
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(base_dir)
 
 
 def sentry_before_send(event, hint):
