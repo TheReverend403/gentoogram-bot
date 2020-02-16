@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 import subprocess
 import sys
@@ -10,6 +11,7 @@ from telegram.ext import MessageHandler, Filters, Updater
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
 log = logging.getLogger('bot')
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def sentry_before_send(event, hint):
@@ -22,7 +24,7 @@ def sentry_before_send(event, hint):
 
 
 version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
-with open('../settings.yml') as fd:
+with open(f'{base_dir}/settings.yml') as fd:
     config = yaml.safe_load(fd)
 
 
