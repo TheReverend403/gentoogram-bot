@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 import sentry_sdk
-from dynaconf import settings
+import yaml
 from telegram.error import TelegramError, NetworkError
 from telegram.ext import MessageHandler, Filters, Updater
 
@@ -22,31 +22,46 @@ def sentry_before_send(event, hint):
 
 
 version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
-sentry_sdk.init(settings['sentry_dsn'], release=version, before_send=sentry_before_send)
+with open('../settings.yml') as fd:
+    config = yaml.safe_load(fd)
 
 
 def main(args):
-    token = settings['token']
+    sentry_dsn = config.get('sentry', {}).get('dsn')
+    if sentry_dsn:
+        sentry_sdk.init(sentry_dsn, release=version, before_send=sentry_before_send)
+
+    token = config.get('telegram').get('token')
     updater = Updater(token=token, use_context=True)
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, anti_china_spam))
+    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, blacklist))
+    dispatcher.add_handler(MessageHandler(Filters.text, blacklist))
     updater.start_polling()
     log.info('Ready!')
 
 
-def anti_china_spam(update, context):
+def blacklist(update, context):
     message = update.message
     chat = message.chat
     user = message.from_user
     name = user.first_name
 
-    if chat.id != settings['chat_id']:
+    if chat.id != config.get('telegram', {}).get('chat_id', 0):
         return
 
-    if re.fullmatch(r'^[\u4e00-\u9fff]+$', name):
-        log.info(f'{name} looks like a Chinese spam bot, kicking.')
-        chat.kick_member(user.id)
-        message.delete()
+    blacklists = config.get('blacklist')
+    for pattern in blacklists.get('usernames'):
+        if re.fullmatch(pattern, name):
+            log.info(f'{name} looks like a spam bot, kicking. Regex: {pattern}')
+            chat.kick_member(user.id)
+            message.delete()
+            break
+
+    for pattern in blacklists.get('messages'):
+        if re.fullmatch(pattern, message.text):
+            log.info(f'Deleted message {message}. Regex: {pattern}')
+            message.delete()
+            break
 
 
 if __name__ == '__main__':

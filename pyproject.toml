@@ -8,8 +8,8 @@ license = "GPL-3.0"
 [tool.poetry.dependencies]
 python = "^3.6"
 python-telegram-bot = "^12.0.0"
-dynaconf = { version = "^2.2.0", extras = ["yaml"] }
 sentry-sdk = "^0.14.0"
+pyyaml = "^5.3"
 
 [tool.poetry.dev-dependencies]
 

@@ -1,4 +1,10 @@
-default:
+telegram:
   token: ''
-  chat_id: 1234
-  sentry_dsn: ''
+  chat_id: -1234
+
+blacklist:
+  usernames: []
+  messages: []
+
+sentry:
+  dsn: ''
