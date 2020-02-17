@@ -83,8 +83,9 @@ def chat_filter(update, context):
         return
 
     filters = config.get('filters')
+    username = user.username if user.username else ''
     for pattern in filters.get('usernames'):
-        if re.fullmatch(pattern, full_name) or re.fullmatch(pattern, user.username if user.username else ''):
+        if re.fullmatch(pattern, full_name, re.IGNORECASE) or re.fullmatch(pattern, username, re.IGNORECASE):
             logging.info(f'{full_name} looks like a spam bot, kicking. Regex: {pattern}')
             chat.kick_member(user.id)
             message.delete()
@@ -92,7 +93,7 @@ def chat_filter(update, context):
 
     if message.text:
         for pattern in filters.get('messages'):
-            if re.fullmatch(pattern, message.text):
+            if re.fullmatch(pattern, message.text, re.IGNORECASE):
                 logging.info(f'Deleted message {message}. Regex: {pattern}')
                 message.delete()
                 break
