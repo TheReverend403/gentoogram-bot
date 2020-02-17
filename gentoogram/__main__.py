@@ -77,15 +77,15 @@ def chat_filter(update, context):
     message = update.message
     chat = message.chat
     user = message.from_user
-    name = user.first_name
+    full_name = f'{user.first_name} {user.last_name}'
 
     if chat.id != config.get('telegram', {}).get('chat_id', 0):
         return
 
     filters = config.get('filters')
     for pattern in filters.get('usernames'):
-        if re.fullmatch(pattern, name):
-            logging.info(f'{name} looks like a spam bot, kicking. Regex: {pattern}')
+        if re.fullmatch(pattern, full_name) or re.fullmatch(pattern, user.username):
+            logging.info(f'{full_name} looks like a spam bot, kicking. Regex: {pattern}')
             chat.kick_member(user.id)
             message.delete()
             break
