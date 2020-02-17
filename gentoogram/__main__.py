@@ -75,10 +75,10 @@ def reload_config(update, context):
 
 def chat_filter(update, context):
     message = update.message
-    chat = message.chat
-    if not chat:
+    if not message:
         return
 
+    chat = message.chat
     user = message.from_user
     full_name = f'{user.first_name} {user.last_name}'
 
