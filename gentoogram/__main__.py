@@ -1,18 +1,18 @@
 import logging
-import os
 import re
 import subprocess
 import sys
+from functools import wraps
 
 import sentry_sdk
-import yaml
-from telegram.error import TelegramError, NetworkError
-from telegram.ext import MessageHandler, Filters, Updater
+from telegram.error import NetworkError, TelegramError
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+
+from gentoogram.config import Config
 
 logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
-log = logging.getLogger('bot')
-base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(base_dir)
+version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
+config = Config()
 
 
 def sentry_before_send(event, hint):
@@ -24,9 +24,17 @@ def sentry_before_send(event, hint):
     return event
 
 
-version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
-with open(f'{base_dir}/settings.yml') as fd:
-    config = yaml.safe_load(fd)
+def admin(func):
+    @wraps(func)
+    def wrapped(update, context, *args, **kwargs):
+        user_id = update.effective_user.id
+        if user_id not in config.get('admins', []):
+            context.bot.send_message(chat_id=update.effective_chat.id,
+                                     text="That command can only be used by bot admins. Which you are not.")
+            return
+        return func(update, context, *args, **kwargs)
+
+    return wrapped
 
 
 def main(args):
@@ -37,13 +45,20 @@ def main(args):
     token = config.get('telegram').get('token')
     updater = Updater(token=token, use_context=True)
     dispatcher = updater.dispatcher
-    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, blacklist))
-    dispatcher.add_handler(MessageHandler(Filters.text, blacklist))
+    dispatcher.add_handler(CommandHandler('reload', reload_config))
+    dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, chat_filter))
+    dispatcher.add_handler(MessageHandler(Filters.text, chat_filter))
     updater.start_polling()
-    log.info('Ready!')
+    logging.info('Ready!')
 
 
-def blacklist(update, context):
+@admin
+def reload_config(update, context):
+    config.reload()
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Config reloaded!")
+
+
+def chat_filter(update, context):
     message = update.message
     chat = message.chat
     user = message.from_user
@@ -52,17 +67,17 @@ def blacklist(update, context):
     if chat.id != config.get('telegram', {}).get('chat_id', 0):
         return
 
-    blacklists = config.get('blacklist')
-    for pattern in blacklists.get('usernames'):
+    filters = config.get('filters')
+    for pattern in filters.get('usernames'):
         if re.fullmatch(pattern, name):
-            log.info(f'{name} looks like a spam bot, kicking. Regex: {pattern}')
+            logging.info(f'{name} looks like a spam bot, kicking. Regex: {pattern}')
             chat.kick_member(user.id)
             message.delete()
             break
 
-    for pattern in blacklists.get('messages'):
+    for pattern in filters.get('messages'):
         if re.fullmatch(pattern, message.text):
-            log.info(f'Deleted message {message}. Regex: {pattern}')
+            logging.info(f'Deleted message {message}. Regex: {pattern}')
             message.delete()
             break
 

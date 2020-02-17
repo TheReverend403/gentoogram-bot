@@ -2,9 +2,14 @@ telegram:
   token: ''
   chat_id: -1234
 
-blacklist:
+# Regex filters
+filters:
+  # Users with usernames matching any of these will be kicked from the group and their join message will be deleted.
   usernames: []
   messages: []
 
 sentry:
   dsn: ''
+
+# Telegram user ids.
+admins: []
