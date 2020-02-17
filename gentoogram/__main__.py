@@ -90,11 +90,12 @@ def chat_filter(update, context):
             message.delete()
             break
 
-    for pattern in filters.get('messages'):
-        if re.fullmatch(pattern, message.text):
-            logging.info(f'Deleted message {message}. Regex: {pattern}')
-            message.delete()
-            break
+    if message.text:
+        for pattern in filters.get('messages'):
+            if re.fullmatch(pattern, message.text):
+                logging.info(f'Deleted message {message}. Regex: {pattern}')
+                message.delete()
+                break
 
 
 if __name__ == '__main__':
