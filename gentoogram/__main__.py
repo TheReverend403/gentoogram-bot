@@ -45,7 +45,7 @@ def admin(func):
         user_id = update.effective_user.id
         if user_id not in config.get('admins', []):
             context.bot.send_message(chat_id=update.effective_chat.id,
-                                     text="That command can only be used by bot admins. Which you are not.")
+                                     text='That command can only be used by bot admins. Which you are not.')
             return
         return func(update, context, *args, **kwargs)
 
@@ -70,7 +70,7 @@ def main(args):
 @admin
 def reload_config(update, context):
     config.reload()
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Config reloaded!")
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Config reloaded!')
 
 
 def chat_filter(update, context):
