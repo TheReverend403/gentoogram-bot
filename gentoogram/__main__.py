@@ -85,17 +85,21 @@ def chat_filter(update, context):
         return
 
     chat = update.effective_chat
-    user = update.effective_user
-    full_name = f'{user.first_name} {user.last_name}'
-
     if chat.id != config.get('telegram', {}).get('chat_id', 0):
         return
 
-    filters = config.get('filters')
+    user = update.effective_user
     username = user.username if user.username else ''
+
+    full_name = f'{user.first_name}'
+    if user.last_name:
+        full_name += f' {user.last_name}'
+
+    filters = config.get('filters')
     for pattern in filters.get('usernames'):
         if re.fullmatch(pattern, full_name, re.IGNORECASE) or re.fullmatch(pattern, username, re.IGNORECASE):
-            logger.info(f'{full_name} looks like a spam bot, kicking. Regex: {pattern}')
+            log_data = {'user_id': user.id, 'username': username, 'full_name': full_name, 'regex': pattern}
+            logger.info(f'Username filter match: {log_data}')
             chat.kick_member(user.id)
             message.delete()
             break
@@ -105,7 +109,8 @@ def chat_filter(update, context):
 
     for pattern in filters.get('messages'):
         if re.fullmatch(pattern, message.text, re.IGNORECASE):
-            logger.info(f'Deleted message {message}. Regex: {pattern}')
+            log_data = {'user_id': user.id, 'text': message.text, 'regex': pattern}
+            logger.info(f'Message filter match: {log_data}')
             message.delete()
             break
 
