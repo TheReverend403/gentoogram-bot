@@ -109,7 +109,12 @@ def chat_filter(update, context):
         if re.fullmatch(pattern, full_name, re.IGNORECASE) or re.fullmatch(pattern, username, re.IGNORECASE):
             log_data.update({'regex': pattern})
             logger.info(f'Username filter match: {log_data}')
-            chat.kick_member(user.id)
+
+            if chat.kick_member(user.id):
+                logger.info(f'Kicked user: {user.id}')
+            else:
+                logger.info(f'Could not kick user: {user.id}')
+
             message.delete()
             break
 
@@ -125,7 +130,10 @@ def chat_filter(update, context):
                 'regex': pattern
             })
             logger.info(f'Message filter match: {log_data}')
-            message.delete()
+            if message.delete():
+                logger.info(f'Deleted message: {message.message_id}')
+            else:
+                logger.info(f'Could not delete message: {message.message_id}')
             break
 
 
