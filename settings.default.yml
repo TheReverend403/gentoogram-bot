@@ -13,3 +13,17 @@ sentry:
 
 # Telegram user ids.
 admins: []
+
+logging:
+  version: 1
+  root:
+    level: INFO
+    handlers: [console]
+  formatters:
+    console:
+      format: '[%(asctime)s] [%(levelname)-5s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: console
+      stream: ext://sys.stdout

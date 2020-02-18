@@ -13,20 +13,18 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 import os
 
 import yaml
 
 
 class Config(dict):
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _config_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/settings.yml'
 
     def __init__(self):
         super().__init__()
-        self.reload()
+        self.load()
 
-    def reload(self):
-        with open(f'{self.base_dir}/settings.yml') as fd:
+    def load(self):
+        with open(self._config_path) as fd:
             self.update(yaml.safe_load(fd))
-            logging.info('Config loaded.')

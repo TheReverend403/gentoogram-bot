@@ -18,6 +18,7 @@ import re
 import subprocess
 import sys
 from functools import wraps
+from logging.config import dictConfig
 
 import sentry_sdk
 from telegram.error import NetworkError, TelegramError
@@ -25,9 +26,10 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 from gentoogram.config import Config
 
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] %(message)s')
-version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
 config = Config()
+dictConfig(config.get('logging'))
+logger = logging.getLogger('gentoogram')
+version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
 
 
 def sentry_before_send(event, hint):
@@ -44,6 +46,7 @@ def admin(func):
     def wrapped(update, context, *args, **kwargs):
         user_id = update.effective_user.id
         if user_id not in config.get('admins', []):
+            logger.debug(f'User {user_id} was denied access to {func.__name__}')
             context.bot.send_message(chat_id=update.effective_chat.id,
                                      text='That command can only be used by bot admins. Which you are not.')
             return
@@ -64,22 +67,25 @@ def main(args):
     dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, chat_filter))
     dispatcher.add_handler(MessageHandler(Filters.text, chat_filter))
     updater.start_polling()
-    logging.info('Ready!')
+    logger.info('Ready!')
 
 
 @admin
 def reload_config(update, context):
-    config.reload()
+    config.load()
+    logger.debug('Config reloaded.')
     context.bot.send_message(chat_id=update.effective_chat.id, text='Config reloaded!')
 
 
 def chat_filter(update, context):
-    message = update.message
+    logger.debug(f'{update}')
+
+    message = update.effective_message
     if not message:
         return
 
-    chat = message.chat
-    user = message.from_user
+    chat = update.effective_chat
+    user = update.effective_user
     full_name = f'{user.first_name} {user.last_name}'
 
     if chat.id != config.get('telegram', {}).get('chat_id', 0):
@@ -89,17 +95,19 @@ def chat_filter(update, context):
     username = user.username if user.username else ''
     for pattern in filters.get('usernames'):
         if re.fullmatch(pattern, full_name, re.IGNORECASE) or re.fullmatch(pattern, username, re.IGNORECASE):
-            logging.info(f'{full_name} looks like a spam bot, kicking. Regex: {pattern}')
+            logger.info(f'{full_name} looks like a spam bot, kicking. Regex: {pattern}')
             chat.kick_member(user.id)
             message.delete()
             break
 
-    if message.text:
-        for pattern in filters.get('messages'):
-            if re.fullmatch(pattern, message.text, re.IGNORECASE):
-                logging.info(f'Deleted message {message}. Regex: {pattern}')
-                message.delete()
-                break
+    if not message.text:
+        return
+
+    for pattern in filters.get('messages'):
+        if re.fullmatch(pattern, message.text, re.IGNORECASE):
+            logger.info(f'Deleted message {message}. Regex: {pattern}')
+            message.delete()
+            break
 
 
 if __name__ == '__main__':
