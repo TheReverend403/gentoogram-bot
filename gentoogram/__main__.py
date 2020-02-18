@@ -125,6 +125,7 @@ def chat_filter(update, context):
         if re.fullmatch(pattern, message.text, re.IGNORECASE):
             log_data.update({
                 'message': {
+                    'id': message.message_id,
                     'text': message.text
                 },
                 'regex': pattern
