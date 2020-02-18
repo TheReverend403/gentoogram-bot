@@ -98,7 +98,12 @@ def chat_filter(update, context):
     filters = config.get('filters')
     for pattern in filters.get('usernames'):
         if re.fullmatch(pattern, full_name, re.IGNORECASE) or re.fullmatch(pattern, username, re.IGNORECASE):
-            log_data = {'user_id': user.id, 'username': username, 'full_name': full_name, 'regex': pattern}
+            log_data = {
+                'user_id': user.id,
+                'username': username,
+                'full_name': full_name,
+                'regex': pattern
+            }
             logger.info(f'Username filter match: {log_data}')
             chat.kick_member(user.id)
             message.delete()
@@ -109,7 +114,13 @@ def chat_filter(update, context):
 
     for pattern in filters.get('messages'):
         if re.fullmatch(pattern, message.text, re.IGNORECASE):
-            log_data = {'user_id': user.id, 'text': message.text, 'regex': pattern}
+            log_data = {
+                'user_id': user.id,
+                'username': username,
+                'full_name': full_name,
+                'text': message.text,
+                'regex': pattern
+            }
             logger.info(f'Message filter match: {log_data}')
             message.delete()
             break
