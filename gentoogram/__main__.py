@@ -110,12 +110,11 @@ def chat_filter(update, context):
             log_data.update({'regex': pattern})
             logger.info(f'Username filter match: {log_data}')
 
-            if chat.kick_member(user.id):
-                logger.info(f'Kicked user {user.id}')
+            if chat.kick_member(user.id) and message.delete():
+                logger.info(f'Kicked user {user.id}.')
             else:
-                logger.info(f'Could not kick user {user.id}')
+                logger.info(f'Could not kick user {user.id}.')
 
-            message.delete()
             break
 
     if not message.text:
