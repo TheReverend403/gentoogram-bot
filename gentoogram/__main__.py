@@ -107,7 +107,7 @@ def chat_filter(update, context):
 
     filters = config.get('filters')
     for pattern in filters.get('usernames'):
-        if re.fullmatch(pattern, full_name, re_flags) or re.fullmatch(pattern, username, re_flags):
+        if re.match(pattern, full_name, re_flags) or re.match(pattern, username, re_flags):
             log_data.update({'regex': pattern})
             logger.info(f'Username filter match: {log_data}')
 
@@ -122,7 +122,7 @@ def chat_filter(update, context):
         return
 
     for pattern in filters.get('messages'):
-        if re.fullmatch(pattern, message.text, re_flags):
+        if re.match(pattern, message.text, re_flags):
             log_data.update({
                 'message': {
                     'id': message.message_id,
