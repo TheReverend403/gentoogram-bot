@@ -30,6 +30,7 @@ config = Config()
 dictConfig(config.get('logging'))
 logger = logging.getLogger('gentoogram')
 version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
+re_flags = re.UNICODE | re.IGNORECASE | re.DOTALL
 
 
 def sentry_before_send(event, hint):
@@ -106,7 +107,7 @@ def chat_filter(update, context):
 
     filters = config.get('filters')
     for pattern in filters.get('usernames'):
-        if re.fullmatch(pattern, full_name, re.IGNORECASE) or re.fullmatch(pattern, username, re.IGNORECASE):
+        if re.fullmatch(pattern, full_name, re_flags) or re.fullmatch(pattern, username, re_flags):
             log_data.update({'regex': pattern})
             logger.info(f'Username filter match: {log_data}')
 
@@ -121,7 +122,7 @@ def chat_filter(update, context):
         return
 
     for pattern in filters.get('messages'):
-        if re.fullmatch(pattern, message.text, re.IGNORECASE):
+        if re.fullmatch(pattern, message.text, re_flags):
             log_data.update({
                 'message': {
                     'id': message.message_id,
