@@ -86,7 +86,7 @@ def chat_filter(update, context):
         return
 
     chat = update.effective_chat
-    if chat.id not in [int(chat) for chats in config.get('telegram', {}).get('chats', [])]:
+    if chat.id not in [int(chat) for chat in config.get('telegram', {}).get('chats', [])]:
         return
 
     user = update.effective_user
