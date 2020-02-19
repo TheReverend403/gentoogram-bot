@@ -1,6 +1,7 @@
 telegram:
   token: ''
-  chat_id: -1234
+  chats:
+    - '-1234'
 
 # Regex filters
 filters:
