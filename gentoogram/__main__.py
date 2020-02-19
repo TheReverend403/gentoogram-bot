@@ -102,6 +102,11 @@ def chat_filter(update, context):
             'username': username,
             'first_name': user.first_name,
             'last_name': user.last_name
+        },
+        'chat': {
+            'id': chat.id,
+            'type': chat.type,
+            'username': chat.username
         }
     }
 
