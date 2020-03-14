@@ -67,6 +67,7 @@ def main(args):
     dispatcher.add_handler(CommandHandler('reload', reload_config))
     dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, chat_filter))
     dispatcher.add_handler(MessageHandler(Filters.text, chat_filter))
+    dispatcher.add_handler(MessageHandler(Filters.forwarded, chat_filter))
     updater.start_polling()
     logger.info('Ready!')
 
