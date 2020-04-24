@@ -20,6 +20,7 @@ import sys
 from functools import wraps
 from logging.config import dictConfig
 
+import requests
 import sentry_sdk
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
@@ -79,6 +80,17 @@ def reload_config(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text='Config reloaded!')
 
 
+def is_spammer(user_id: int) -> bool:
+    try:
+        with requests.get(f'https://api.cas.chat/check?user_id={user_id}', timeout=5) as response:
+            check_result = response.json()
+    except (requests.RequestException, TimeoutError) as exc:
+        logger.warning(exc)
+        return False
+
+    return not check_result.get('ok')
+
+
 def chat_filter(update, context):
     logger.debug(f'{update}')
 
@@ -91,6 +103,13 @@ def chat_filter(update, context):
         return
 
     user = update.effective_user
+    if is_spammer(user.id):
+        if chat.kick_member(user.id) and message.delete():
+            logger.info(f'Kicked user {user.id} (CAS).')
+        else:
+            logger.info(f'Could not kick user {user.id}.')
+        return
+
     username = user.username if user.username else ''
 
     full_name = f'{user.first_name}'
