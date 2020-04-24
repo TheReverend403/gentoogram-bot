@@ -103,13 +103,6 @@ def chat_filter(update, context):
         return
 
     user = update.effective_user
-    if is_spammer(user.id):
-        if chat.kick_member(user.id) and message.delete():
-            logger.info(f'Kicked user {user.id} (CAS).')
-        else:
-            logger.info(f'Could not kick user {user.id}.')
-        return
-
     username = user.username if user.username else ''
 
     full_name = f'{user.first_name}'
@@ -129,6 +122,14 @@ def chat_filter(update, context):
             'username': chat.username
         }
     }
+
+    if is_spammer(user.id):
+        logger.info(f'CAS check match: {log_data}')
+        if chat.kick_member(user.id) and message.delete():
+            logger.info(f'Kicked user {user.id} (CAS).')
+        else:
+            logger.info(f'Could not kick user {user.id} (CAS).')
+        return
 
     filters = config.get('filters')
     for pattern in filters.get('usernames'):
