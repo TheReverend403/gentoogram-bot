@@ -90,7 +90,7 @@ def is_spammer(user_id: int) -> bool:
 
     if check_result.get('ok'):
         offenses = check_result.get('result').get('offenses')
-        if offenses > config.get('antispam_threshold', 1):
+        if offenses >= config.get('antispam_threshold', 1):
             logger.info(f'User {user_id} failed CAS spam check with {offenses} offense(s).')
             return True
 
