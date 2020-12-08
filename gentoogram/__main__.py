@@ -63,7 +63,6 @@ def main():
         sentry_sdk.init(sentry_dsn, release=version, before_send=sentry_before_send)
 
     token = config.get('telegram.token')
-    print(token)
     updater = Updater(token=token, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('reload', reload_config))
