@@ -16,18 +16,18 @@
 import logging
 import re
 import subprocess
-import sys
 from functools import wraps
 from logging.config import dictConfig
 
 import requests
 import sentry_sdk
+from dynaconf import Dynaconf
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from gentoogram.config import Config
+from gentoogram import BASE_DIR
 
-config = Config()
+config = Dynaconf(settings_file=[BASE_DIR / 'settings.yml'])
 dictConfig(config.get('logging'))
 logger = logging.getLogger('gentoogram')
 version = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('UTF-8')
@@ -57,12 +57,13 @@ def admin(func):
     return wrapped
 
 
-def main(args):
-    sentry_dsn = config.get('sentry', {}).get('dsn')
+def main():
+    sentry_dsn = config.get('sentry.dsn')
     if sentry_dsn:
         sentry_sdk.init(sentry_dsn, release=version, before_send=sentry_before_send)
 
-    token = config.get('telegram').get('token')
+    token = config.get('telegram.token')
+    print(token)
     updater = Updater(token=token, use_context=True)
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler('reload', reload_config))
@@ -75,7 +76,7 @@ def main(args):
 
 @admin
 def reload_config(update, context):
-    config.load()
+    config.reload()
     logger.debug('Config reloaded.')
     context.bot.send_message(chat_id=update.effective_chat.id, text='Config reloaded!')
 
@@ -105,7 +106,7 @@ def chat_filter(update, context):
         return
 
     chat = update.effective_chat
-    if chat.id not in [int(chat) for chat in config.get('telegram', {}).get('chats', [])]:
+    if chat.id not in [int(chat) for chat in config.get('telegram.chats', [])]:
         return
 
     user = update.effective_user
@@ -171,4 +172,4 @@ def chat_filter(update, context):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

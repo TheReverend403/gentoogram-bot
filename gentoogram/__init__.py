@@ -13,18 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
+from pathlib import Path
 
-import yaml
-
-
-class Config(dict):
-    _config_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/settings.yml'
-
-    def __init__(self):
-        super().__init__()
-        self.load()
-
-    def load(self):
-        with open(self._config_path) as fd:
-            self.update(yaml.safe_load(fd))
+BASE_DIR = Path(__file__).parent.parent
