@@ -1,6 +1,7 @@
 # gentoogram-bot
 
 ![GitHub](https://img.shields.io/github/license/TheReverend403/gentoogram-bot?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TheReverend403/gentoogram-bot/ci?style=flat-square)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square)](https://github.com/psf/black)
 
 
