@@ -22,7 +22,7 @@ flake8-bugbear = "^22.1.0"
 
 [tool.isort]
 profile = "black"
-src_paths = ["cappuccino"]
+src_paths = ["gentoogram"]
 
 [build-system]
 requires = ["poetry>=1.0"]
