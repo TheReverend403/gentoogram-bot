@@ -1,0 +1,10 @@
+telegram:
+  token: ''
+  chat_id: ''
+  admin_id: ''
+
+filters:
+  usernames: []
+  messages: []
+
+sentry_dsn: ''

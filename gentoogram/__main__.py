@@ -17,7 +17,6 @@ import logging
 import re
 import subprocess
 from functools import wraps
-from logging.config import dictConfig
 
 import requests
 import sentry_sdk
@@ -27,12 +26,18 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
 from gentoogram import BASE_DIR
 
-config = Dynaconf(settings_file=[BASE_DIR / "settings.yml"])
-dictConfig(config.get("logging"))
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gentoogram")
-version = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode(
-    "UTF-8"
-)
+
+config = Dynaconf(settings_file=[BASE_DIR / "config" / "settings.yml"])
+
+try:
+    version = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode(
+        "UTF-8"
+    )
+except FileNotFoundError:
+    version = "gentoogram (docker)"
+
 re_flags = re.UNICODE | re.IGNORECASE | re.DOTALL
 
 
@@ -49,7 +54,7 @@ def admin(func):
     @wraps(func)
     def wrapped(update, context, *args, **kwargs):
         user_id = update.effective_user.id
-        if user_id not in config.get("admins", []):
+        if user_id != config.get("telegram.admin"):
             logger.debug(f"User {user_id} was denied access to {func.__name__}")
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
@@ -115,7 +120,7 @@ def chat_filter(update, context):  # noqa: C901
         return
 
     chat = update.effective_chat
-    if chat.id not in [int(chat) for chat in config.get("telegram.chats", [])]:
+    if chat.id != int(config.get("telegram.chat_id")):
         return
 
     user = update.effective_user

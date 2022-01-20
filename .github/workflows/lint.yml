@@ -1,6 +1,6 @@
-name: ci
+name: Lint with pre-commit
 
-on: [push, pull_request]
+on: [pull_request, push]
 
 jobs:
   quality:
