@@ -42,12 +42,13 @@ FROM python-base as production
 
 COPY --from=sudobmitch/base:scratch / /
 COPY docker/entrypoint.d/ /etc/entrypoint.d/
+COPY docker/healthcheck.d/ /etc/healthcheck.d/
 
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-        util-linux
+        curl
 
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=python-builder-base $PYSETUP_PATH $PYSETUP_PATH
 
@@ -66,5 +67,6 @@ ENV APP_USER=${APP_USER} \
 
 VOLUME ["/config"]
 
+HEALTHCHECK CMD ["/usr/bin/healthcheckd.sh"]
 ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["python", "-m", "gentoogram"]
