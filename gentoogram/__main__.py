@@ -54,7 +54,7 @@ def admin(func):
     @wraps(func)
     def wrapped(update, context, *args, **kwargs):
         user_id = update.effective_user.id
-        if user_id != config.get("telegram.admin"):
+        if user_id != config.get("telegram.admin_id"):
             logger.debug(f"User {user_id} was denied access to {func.__name__}")
             context.bot.send_message(
                 chat_id=update.effective_chat.id,
