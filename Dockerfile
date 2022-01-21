@@ -67,6 +67,6 @@ ENV APP_USER=${APP_USER} \
 
 VOLUME ["/config"]
 
-HEALTHCHECK CMD ["/usr/bin/healthcheckd.sh"]
+HEALTHCHECK --interval=10s --timeout=5s CMD ["/usr/bin/healthcheckd.sh"]
 ENTRYPOINT ["/usr/bin/entrypointd.sh"]
 CMD ["python", "-m", "gentoogram"]
