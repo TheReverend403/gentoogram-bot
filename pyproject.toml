@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gentoogram-bot"
-version = "0.2.3"
+version = "0.2.4"
 description = ""
 authors = ["Lee Watson <me@lwatson.dev>"]
 license = "GPL-3.0"
