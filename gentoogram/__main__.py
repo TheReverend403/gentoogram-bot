@@ -148,8 +148,8 @@ def chat_filter(update, context):  # noqa: C901
             log_data.update({"regex": pattern})
             logger.info(f"Username filter match: {log_data}")
 
-            if chat.kick_member(user.id) and message.delete():
-                logger.info(f"Kicked user {user.id}.")
+            if chat.ban_member(user.id) and message.delete():
+                logger.info(f"Banned user {user.id}.")
             else:
                 logger.info(f"Could not kick user {user.id}.")
 
@@ -159,7 +159,7 @@ def chat_filter(update, context):  # noqa: C901
     if not message.text:
         if is_spammer(user.id):
             logger.info(f"CAS check match: {log_data}")
-            if chat.kick_member(user.id) and message.delete():
+            if chat.ban_member(user.id) and message.delete():
                 logger.info(f"Kicked user {user.id} (CAS).")
             else:
                 logger.info(f"Could not kick user {user.id} (CAS).")
