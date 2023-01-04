@@ -1,38 +1,43 @@
-ARG PYTHON_VERSION=3.9
-ARG POETRY_VERSION=1.1.12
+ARG ARG_PYTHON_VERSION=3.11
+ARG ARG_POETRY_VERSION=1.3.1
+ARG ARG_S6_OVERLAY_VERSION=3.1.2.1
+ARG ARG_S6_DOWNLOAD_PATH="/opt/s6"
+ARG ARG_POETRY_HOME="/opt/poetry"
+ARG ARG_PYSETUP_PATH="/opt/pysetup"
+ARG ARG_VENV_PATH="${ARG_PYSETUP_PATH}/.venv"
 
 ## Base
-FROM python:${PYTHON_VERSION}-slim as python-base
+FROM python:${ARG_PYTHON_VERSION}-slim as python-base
+
+ARG ARG_POETRY_HOME
+ARG ARG_VENV_PATH
+
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=$POETRY_VERSION \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
-    POETRY_NO_INTERACTION=1 \
-    PYSETUP_PATH="/opt/pysetup" \
-    VENV_PATH="/opt/pysetup/.venv" \
-    S6_DOWNLOAD_PATH="/opt/s6"
-
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+    POETRY_HOME=${ARG_POETRY_HOME} \
+    PATH="${ARG_VENV_PATH}/bin:${ARG_POETRY_HOME}/bin:$PATH"
 
 
 FROM python-base as s6-base
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    xz-utils
+    xz-utils \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ARG S6_OVERLAY_VERSION="3.0.0.2"
+ARG ARG_S6_OVERLAY_VERSION
+ARG ARG_S6_DOWNLOAD_PATH
 
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz /tmp
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-x86_64-${S6_OVERLAY_VERSION}.tar.xz /tmp
-RUN mkdir -p "$S6_DOWNLOAD_PATH" && \
-    tar -C "$S6_DOWNLOAD_PATH/" -Jxpf /tmp/s6-overlay-x86_64-${S6_OVERLAY_VERSION}.tar.xz && \
-    tar -C "$S6_DOWNLOAD_PATH/" -Jxpf /tmp/s6-overlay-noarch-${S6_OVERLAY_VERSION}.tar.xz
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${ARG_S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${ARG_S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
+RUN mkdir -p "${ARG_S6_DOWNLOAD_PATH}" && \
+    tar -C "${ARG_S6_DOWNLOAD_PATH}" -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
+    tar -C "${ARG_S6_DOWNLOAD_PATH}" -Jxpf /tmp/s6-overlay-noarch.tar.xz
+
 
 
 ## Python builder
@@ -40,17 +45,24 @@ FROM python-base as python-builder-base
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    curl
+    curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# install poetry - respects $POETRY_VERSION & $POETRY_HOME
+
+ARG ARG_POETRY_VERSION
+ARG ARG_PYSETUP_PATH
+
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1 \
+    POETRY_VERSION=${ARG_POETRY_VERSION}
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -sSL https://install.python-poetry.org | python -
 
-# copy project requirement files here to ensure they will be cached.
-WORKDIR $PYSETUP_PATH
-COPY poetry.lock pyproject.toml ./
+WORKDIR ${ARG_PYSETUP_PATH}
 
-# install runtime deps - uses $POETRY_VIRTUALENVS_IN_PROJECT internally
-RUN poetry install --no-dev
+COPY poetry.lock pyproject.toml ./
+RUN poetry install --only main
 
 
 ## Production image
@@ -58,28 +70,26 @@ FROM python-base as production
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
-    curl
+      curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+ARG ARG_S6_DOWNLOAD_PATH
+ARG ARG_VENV_PATH
 
-COPY --from=python-builder-base $PYSETUP_PATH $PYSETUP_PATH
-
-COPY --from=s6-base $S6_DOWNLOAD_PATH /
+COPY --from=s6-base ${ARG_S6_DOWNLOAD_PATH} /
+COPY --from=python-builder-base ${ARG_VENV_PATH} ${ARG_VENV_PATH}
 COPY docker/rootfs /
-
-ARG APP_USER=app
-
-RUN addgroup --gid 1000 --system ${APP_USER} && \
-    adduser --uid 1000 --system --gid 1000 --no-create-home ${APP_USER}
 
 WORKDIR /app
 
-COPY --chown=${APP_USER}:${APP_USER} ./gentoogram ./gentoogram
+COPY ./gentoogram ./gentoogram
 
-ENV APP_USER=${APP_USER} \
+ENV PYTHONPATH="." \
     SETTINGS_FILE_FOR_DYNACONF="/config/settings.yml" \
-    PYTHONPATH="." \
-    S6_BEHAVIOUR_IF_STAGE2_FAILS=2
+    S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
+    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+    S6_READ_ONLY_ROOT=1
+
 
 VOLUME ["/config"]
 

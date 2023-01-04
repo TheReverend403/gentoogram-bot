@@ -1,5 +1,5 @@
 #!/command/with-contenv sh
-set -e
+set -eu
 
 if ! test -f "$SETTINGS_FILE_FOR_DYNACONF"; then
     echo "Copying default settings.yml"
