@@ -15,6 +15,7 @@
 
 import logging
 import re
+import secrets
 import subprocess
 from functools import wraps
 
@@ -87,7 +88,24 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT, chat_filter))
     app.add_handler(MessageHandler(filters.FORWARDED, chat_filter))
 
-    app.run_polling()
+    if not config.get("telegram.webhook.enabled", False):
+        app.run_polling()
+    else:
+        listen_addr = config.get("telegram.webhook.listen", "0.0.0.0")
+        port = config.get("telegram.webhook.port", 3020)
+        url_base = config.get("telegram.webhook.url_base")
+        url_path = config.get("telegram.webhook.url_path", "/")
+        url = f"{url_base}{url_path}"
+        secret_token = secrets.token_hex()
+
+        app.run_webhook(
+            listen=listen_addr,
+            port=port,
+            webhook_url=url,
+            url_path=url_path,
+            secret_token=secret_token,
+        )
+
     logger.info("Ready!")
 
 
