@@ -1,7 +1,5 @@
 ARG ARG_PYTHON_VERSION=3.11
 ARG ARG_POETRY_VERSION=1.3.2
-ARG ARG_S6_OVERLAY_VERSION=3.1.3.0
-ARG ARG_S6_DOWNLOAD_PATH="/opt/s6"
 ARG ARG_POETRY_HOME="/opt/poetry"
 ARG ARG_PYSETUP_PATH="/opt/pysetup"
 ARG ARG_VENV_PATH="${ARG_PYSETUP_PATH}/.venv"
@@ -19,23 +17,6 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DEFAULT_TIMEOUT=100 \
     POETRY_HOME=${ARG_POETRY_HOME} \
     PATH="${ARG_VENV_PATH}/bin:${ARG_POETRY_HOME}/bin:$PATH"
-
-
-FROM python-base as s6-base
-
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-    xz-utils \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-ARG ARG_S6_OVERLAY_VERSION
-ARG ARG_S6_DOWNLOAD_PATH
-
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${ARG_S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${ARG_S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp
-RUN mkdir -p "${ARG_S6_DOWNLOAD_PATH}" && \
-    tar -C "${ARG_S6_DOWNLOAD_PATH}" -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
-    tar -C "${ARG_S6_DOWNLOAD_PATH}" -Jxpf /tmp/s6-overlay-noarch.tar.xz
 
 
 ## Python builder
@@ -71,10 +52,8 @@ RUN apt-get update && \
       curl && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ARG ARG_S6_DOWNLOAD_PATH
 ARG ARG_VENV_PATH
 
-COPY --from=s6-base ${ARG_S6_DOWNLOAD_PATH} /
 COPY --from=python-builder-base ${ARG_VENV_PATH} ${ARG_VENV_PATH}
 COPY docker/rootfs /
 
@@ -83,13 +62,10 @@ WORKDIR /app
 COPY ./gentoogram ./gentoogram
 
 ENV PYTHONPATH="." \
-    SETTINGS_FILE_FOR_DYNACONF="/config/settings.yml" \
-    S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0 \
-    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
-    S6_READ_ONLY_ROOT=1
+    SETTINGS_FILE_FOR_DYNACONF="/config/settings.yml"
 
 VOLUME ["/config"]
 
-HEALTHCHECK --interval=10s --timeout=5s CMD ["/bin/healthcheck"]
+HEALTHCHECK --interval=30s --timeout=5s CMD ["/docker-healthcheck.sh"]
 
-ENTRYPOINT ["/init"]
+ENTRYPOINT ["/docker-init.sh"]

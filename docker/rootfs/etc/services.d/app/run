@@ -1,7 +1,0 @@
-#!/command/with-contenv sh
-set -eu
-
-cd /app || exit 1
-
-# shellcheck disable=SC2086
-s6-setuidgid "$PUID:$PGID" python -m gentoogram
