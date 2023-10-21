@@ -40,9 +40,9 @@ logger = logging.getLogger("gentoogram")
 config = Dynaconf(settings_file=[BASE_DIR / "config" / "settings.yml"])
 
 try:
-    version = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode(
-        "UTF-8"
-    )
+    version = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"]  # noqa: S603, S607
+    ).decode("UTF-8")
 except FileNotFoundError:
     version = "gentoogram (docker)"
 
@@ -52,7 +52,7 @@ re_flags = re.UNICODE | re.IGNORECASE | re.DOTALL
 def sentry_before_send(event, hint):
     if "exc_info" in hint:
         exc_type, exc_value, tb = hint["exc_info"]
-        if isinstance(exc_value, (TelegramError, NetworkError)):
+        if isinstance(exc_value, TelegramError | NetworkError):
             return None
 
     return event
@@ -70,7 +70,7 @@ def admin(func):
                 chat_id=update.effective_chat.id,
                 text="That command can only be used by bot admins. Which you are not.",
             )
-            return
+            return None
         return await func(update, context, *args, **kwargs)
 
     return wrapped
@@ -91,7 +91,7 @@ def main():
     if not config.get("telegram.webhook.enabled", False):
         app.run_polling()
     else:
-        listen_addr = config.get("telegram.webhook.listen", "0.0.0.0")
+        listen_addr = config.get("telegram.webhook.listen", "0.0.0.0")  # noqa: S104
         port = config.get("telegram.webhook.port", 3020)
         url_base = config.get("telegram.webhook.url_base")
         url_path = config.get("telegram.webhook.url_path", "/")
