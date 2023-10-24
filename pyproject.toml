@@ -31,6 +31,7 @@ select = [
     "FIX",
     "I",
     "N",
+    "PL",
     "PTH",
     "RET",
     "RSE",
@@ -44,9 +45,13 @@ select = [
 ]
 
 # ruff format compatibility
-extend-ignore = [
+ignore = [
     "E501",
     "W191",
+]
+
+extend-ignore = [
+    "PLR09",
 ]
 
 [build-system]
