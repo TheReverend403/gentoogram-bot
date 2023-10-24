@@ -21,11 +21,32 @@ target-version = "py311"
 force-exclude = true
 
 select = [
-    "B", "I", "UP", "C90", "W",
-    "YTT", "PTH", "A", "RET", "SIM",
-    "FIX", "ERA", "Q", "T20", "RUF",
-    "S", "RSE", "BLE", "N", "E",
+    "A",
+    "B",
+    "BLE",
+    "C90",
+    "E",
+    "ERA",
     "F",
+    "FIX",
+    "I",
+    "N",
+    "PTH",
+    "RET",
+    "RSE",
+    "RUF",
+    "S",
+    "SIM",
+    "T20",
+    "UP",
+    "W",
+    "YTT",
+]
+
+# ruff format compatibility
+extend-ignore = [
+    "E501",
+    "W191",
 ]
 
 [build-system]
