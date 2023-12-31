@@ -43,7 +43,7 @@ WORKDIR ${PYSETUP_PATH}
 
 COPY poetry.lock pyproject.toml ./
 RUN --mount=type=cache,target=/root/.cache \
-    poetry install --only main
+    poetry install --no-root --only main
 
 
 ## Production image
