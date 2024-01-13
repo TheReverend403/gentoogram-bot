@@ -1,7 +1,7 @@
 # gentoogram-bot
 
 ![GitHub](https://img.shields.io/github/license/TheReverend403/gentoogram-bot?style=flat-square)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TheReverend403/gentoogram-bot/docker.yml?branch=main&style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/TheReverend403/gentoogram-bot/build-docker-image.yml?branch=main&style=flat-square)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg?style=flat-square)](https://github.com/astral-sh/ruff)
 
 
