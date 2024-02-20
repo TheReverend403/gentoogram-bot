@@ -73,4 +73,4 @@ VOLUME ["/config"]
 
 HEALTHCHECK --interval=30s --timeout=5s CMD ["/docker-healthcheck.sh"]
 
-ENTRYPOINT ["/docker-init.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
