@@ -57,7 +57,8 @@ COPY --from=python-builder-base ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY docker/rootfs /
 COPY gentoogram ./gentoogram
 
-ENV ROOT_PATH_FOR_DYNACONF="/config"
+ENV ROOT_PATH_FOR_DYNACONF="/config" \
+    INSTANCE_FOR_DYNACONF="gentoogram.__main__.config"
 
 VOLUME ["/config"]
 
