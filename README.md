@@ -11,7 +11,8 @@ Just a bot for the [@Gentoogram](https://t.me/Gentoogram) Telegram group. It fil
 
 ```
 poetry install
-cp settings.default.yml settings.yml
-$EDITOR settings.yml
+mkdir config/
+cp gentoogram/resources/config/settings.yml config/
+$EDITOR config/settings.yml
 poetry run python -m gentoogram
 ```
