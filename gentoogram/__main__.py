@@ -32,12 +32,20 @@ from telegram.ext import (
     filters,
 )
 
-from gentoogram import BASE_DIR
+from gentoogram import CONFIG_DIR
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gentoogram")
 
-config = Dynaconf(settings_file=[BASE_DIR / "config" / "settings.yml"])
+config = Dynaconf(
+    envvar_prefix="CFG",
+    root_path=CONFIG_DIR,
+    settings_files=[
+        "*.toml",
+        "*.yml",
+        "*.yaml",
+    ],
+)
 
 try:
     version = subprocess.check_output(
@@ -88,13 +96,13 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT, chat_filter))
     app.add_handler(MessageHandler(filters.FORWARDED, chat_filter))
 
-    if not config.get("telegram.webhook.enabled", False):
+    if not config.get("webhook.enabled", False):
         app.run_polling()
     else:
-        listen_addr = config.get("telegram.webhook.listen", "0.0.0.0")  # noqa: S104
-        port = config.get("telegram.webhook.port", 3020)
-        url_base = config.get("telegram.webhook.url_base")
-        url_path = config.get("telegram.webhook.url_path", "/")
+        listen_addr = config.get("webhook.listen", "0.0.0.0")  # noqa: S104
+        port = config.get("webhook.port", 3020)
+        url_base = config.get("webhook.url_base")
+        url_path = config.get("webhook.url_path", "/")
         url = f"{url_base}{url_path}"
         secret_token = secrets.token_hex()
 
@@ -131,7 +139,7 @@ async def is_spammer(user_id: int) -> bool:
 
     if check_result.get("ok"):
         offenses = check_result.get("result").get("offenses")
-        if offenses >= config.get("antispam_threshold", 1):
+        if offenses >= config.get("antispam.threshold", 1):
             logger.info(
                 f"User {user_id} failed CAS spam check with {offenses} offense(s)."
             )

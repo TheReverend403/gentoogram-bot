@@ -1,11 +1,9 @@
 #!/bin/sh
 set -eu
 
-cd /app || exit 1
-
-if ! test -f "$SETTINGS_FILE_FOR_DYNACONF"; then
-    echo "Copying default settings.yml"
-    cp -au gentoogram/resources/config/settings.yml "$SETTINGS_FILE_FOR_DYNACONF"
+if [ -z "$(find "$ROOT_PATH_FOR_DYNACONF" -type f -mindepth 1 -maxdepth 1)" ]; then
+    echo "Copying default settings.yml to $ROOT_PATH_FOR_DYNACONF"
+    cp -au gentoogram/resources/config/settings.yml "$ROOT_PATH_FOR_DYNACONF"
 fi
 
 exec python -m gentoogram

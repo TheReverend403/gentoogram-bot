@@ -2,16 +2,21 @@ telegram:
   token: ''
   chat_id: ''
   admin_id: ''
-  webhook:
-    # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks
-    enabled: false
-    listen: 0.0.0.0
-    port: 3020
-    url_base: https://example.com
-    url_path: /
+
+webhook:
+  # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks
+  enabled: false
+  listen: 0.0.0.0
+  port: 3020
+  url_base: https://example.com
+  url_path: /
 
 filters:
   usernames: []
   messages: []
 
-sentry_dsn: ''
+sentry:
+  dsn: ''
+
+antispam:
+  threshold: 1
