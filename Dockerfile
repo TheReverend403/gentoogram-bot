@@ -25,6 +25,7 @@ RUN python -m venv "${VIRTUAL_ENV}"
 
 WORKDIR /app
 
+
 ## Python builder
 FROM python-base as python-builder-base
 
