@@ -12,8 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
-import os
+
+import logging
 from pathlib import Path
 
+logging.basicConfig(level=logging.INFO)
+
 BASE_DIR = Path(__file__).parent.parent
-CONFIG_DIR = os.getenv("ROOT_PATH_FOR_DYNACONF", BASE_DIR / "config")

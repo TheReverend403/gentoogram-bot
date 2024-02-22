@@ -21,7 +21,6 @@ from functools import wraps
 
 import httpx
 import sentry_sdk
-from dynaconf import Dynaconf
 from telegram import Update
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import (
@@ -32,20 +31,9 @@ from telegram.ext import (
     filters,
 )
 
-from gentoogram import CONFIG_DIR
+from gentoogram.config import config
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("gentoogram")
-
-config = Dynaconf(
-    envvar_prefix="CFG",
-    root_path=CONFIG_DIR,
-    settings_files=[
-        "*.toml",
-        "*.yml",
-        "*.yaml",
-    ],
-)
+logger = logging.getLogger(__name__)
 
 try:
     version = subprocess.check_output(
@@ -127,6 +115,9 @@ async def reload_config(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def is_spammer(user_id: int) -> bool:
+    if not config.get("cas.enabled", True):
+        return True
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
@@ -139,7 +130,7 @@ async def is_spammer(user_id: int) -> bool:
 
     if check_result.get("ok"):
         offenses = check_result.get("result").get("offenses")
-        if offenses >= config.get("antispam.threshold", 1):
+        if offenses >= config.get("cas.threshold", 1):
             logger.info(
                 f"User {user_id} failed CAS spam check with {offenses} offense(s)."
             )
