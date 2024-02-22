@@ -58,7 +58,8 @@ COPY docker/rootfs /
 COPY gentoogram ./gentoogram
 
 ENV ROOT_PATH_FOR_DYNACONF="/config" \
-    INSTANCE_FOR_DYNACONF="gentoogram.__main__.config"
+    INSTANCE_FOR_DYNACONF="gentoogram.__main__.config" \
+    ENV_FOR_DYNACONF=production
 
 VOLUME ["/config"]
 
