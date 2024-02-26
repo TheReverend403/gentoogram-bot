@@ -127,7 +127,7 @@ async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         reply_to_message_id=reply_to,
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=True,
-        text=f"<a href='https://github.com/TheReverend403/gentoogram-bot)'>gentoogram-bot {version.VERSION}</a>",
+        text=f"<a href='https://github.com/TheReverend403/gentoogram-bot'>gentoogram-bot {version.VERSION}</a>",
     )
 
 
