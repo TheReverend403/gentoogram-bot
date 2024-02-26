@@ -16,12 +16,12 @@
 import logging
 import re
 import secrets
-import subprocess
 from functools import wraps
 
 import httpx
 import sentry_sdk
-from telegram import Update
+from telegram import Chat, Update
+from telegram.constants import ParseMode
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import (
     ApplicationBuilder,
@@ -31,16 +31,10 @@ from telegram.ext import (
     filters,
 )
 
+from gentoogram import version
 from gentoogram.config import config
 
 logger = logging.getLogger(__name__)
-
-try:
-    version = subprocess.check_output(
-        ["git", "rev-parse", "--short", "HEAD"]  # noqa: S603, S607
-    ).decode("UTF-8")
-except FileNotFoundError:
-    version = "gentoogram (docker)"
 
 re_flags = re.UNICODE | re.IGNORECASE | re.DOTALL
 
@@ -75,11 +69,14 @@ def admin(func):
 def main():
     sentry_dsn = config.get("sentry.dsn")
     if sentry_dsn:
-        sentry_sdk.init(sentry_dsn, release=version, before_send=sentry_before_send)
+        sentry_sdk.init(
+            sentry_dsn, release=version.VERSION, before_send=sentry_before_send
+        )
 
     token = config.get("telegram.token")
     app = ApplicationBuilder().token(token).build()
-    app.add_handler(CommandHandler("reload", reload_config))
+    app.add_handler(CommandHandler("reload", cmd_reload))
+    app.add_handler(CommandHandler("version", cmd_version))
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, chat_filter))
     app.add_handler(MessageHandler(filters.TEXT, chat_filter))
     app.add_handler(MessageHandler(filters.FORWARDED, chat_filter))
@@ -106,11 +103,31 @@ def main():
 
 
 @admin
-async def reload_config(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_reload(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: ARG001
     config.reload()
     logger.debug("Config reloaded.")
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="Config reloaded!"
+    reply_to = (
+        update.effective_message.id
+        if update.effective_chat.type != Chat.PRIVATE
+        else None
+    )
+    await update.effective_chat.send_message(
+        reply_to_message_id=reply_to,
+        text="Config reloaded!",
+    )
+
+
+async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: ARG001
+    reply_to = (
+        update.effective_message.id
+        if update.effective_chat.type != Chat.PRIVATE
+        else None
+    )
+    await update.effective_chat.send_message(
+        reply_to_message_id=reply_to,
+        parse_mode=ParseMode.HTML,
+        disable_web_page_preview=True,
+        text=f"<a href='https://github.com/TheReverend403/gentoogram-bot)'>gentoogram-bot {version.VERSION}</a>",
     )
 
 
@@ -139,7 +156,7 @@ async def is_spammer(user_id: int) -> bool:
     return False
 
 
-async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: C901
+async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: C901, ARG001
     logger.debug(f"{update}")
 
     message = update.effective_message

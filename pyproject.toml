@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "gentoogram-bot"
-version = "0.5.0"
+version = "0.6.0"
 description = ""
 authors = ["Lee Watson <me@lwatson.dev>"]
 license = "GPL-3.0"
@@ -23,8 +23,10 @@ force-exclude = true
 [tool.ruff.lint]
 select = [
     "A",
+    "ARG",
     "B",
     "BLE",
+    "C4",
     "C90",
     "DTZ",
     "E",
@@ -36,12 +38,16 @@ select = [
     "N",
     "PL",
     "PTH",
+    "Q",
     "RET",
     "RSE",
     "RUF",
     "S",
     "SIM",
+    "SLF",
+    "T10",
     "T20",
+    "TID",
     "UP",
     "W",
     "YTT",
