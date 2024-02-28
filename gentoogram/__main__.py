@@ -31,7 +31,7 @@ from telegram.ext import (
     filters,
 )
 
-from gentoogram import version
+from gentoogram import meta
 from gentoogram.config import config
 
 logger = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ def main():
     sentry_dsn = config.get("sentry.dsn")
     if sentry_dsn:
         sentry_sdk.init(
-            sentry_dsn, release=version.VERSION, before_send=sentry_before_send
+            sentry_dsn, release=meta.VERSION, before_send=sentry_before_send
         )
 
     token = config.get("telegram.token")
@@ -127,7 +127,7 @@ async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         reply_to_message_id=reply_to,
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=True,
-        text=f"<a href='https://github.com/TheReverend403/gentoogram-bot'>gentoogram-bot {version.VERSION}</a>",
+        text=f"<a href='https://github.com/TheReverend403/gentoogram-bot'>gentoogram-bot {meta.VERSION}</a>",
     )
 
 
