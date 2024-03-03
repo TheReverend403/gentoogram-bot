@@ -14,7 +14,7 @@ python-telegram-bot = {version = "^20.1", extras = ["webhooks"]}
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.5.0"
 pre-commit-hooks = "^4.5.0"
-ruff = "^0.2.1"
+ruff = "^0.3.0"
 shellcheck-py = "^0.9.0.6"
 
 [tool.ruff]
@@ -56,8 +56,7 @@ select = [
 
 # ruff format compatibility
 ignore = [
-    "E501",
-    "W191",
+    "E501"
 ]
 
 extend-ignore = [
