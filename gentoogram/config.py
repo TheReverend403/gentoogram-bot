@@ -55,7 +55,7 @@ config.validators.register(
         "webhook.listen",
         len_min=1,
         is_type_of=str,
-        default="127.0.0.1",
+        default="0.0.0.0",  # noqa: S104
         apply_default_on_none=True,
     )
     & Validator(
