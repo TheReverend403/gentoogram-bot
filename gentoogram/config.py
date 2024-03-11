@@ -89,7 +89,7 @@ config.validators.register(
     Validator(
         "cas.enabled",
         is_type_of=bool,
-        default=True,
+        default=False,
         apply_default_on_none=True,
     )
     & Validator(
