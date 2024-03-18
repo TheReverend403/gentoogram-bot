@@ -17,5 +17,6 @@ import logging
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 BASE_DIR = Path(__file__).parent.parent
