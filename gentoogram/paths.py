@@ -13,10 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 from pathlib import Path
-
-logging.basicConfig(level=logging.INFO)
-logging.getLogger("httpx").setLevel(logging.WARNING)
 
 BASE_DIR = Path(__file__).parent.parent

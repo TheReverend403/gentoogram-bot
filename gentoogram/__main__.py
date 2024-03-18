@@ -13,13 +13,15 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 import re
 import secrets
+import sys
 from functools import wraps
 
 import httpx
 import sentry_sdk
+from loguru import logger
+from sentry_sdk.integrations.loguru import LoguruIntegration
 from telegram import Chat, Update
 from telegram.constants import ParseMode
 from telegram.error import NetworkError, TelegramError
@@ -33,8 +35,6 @@ from telegram.ext import (
 
 from gentoogram import meta
 from gentoogram.config import config
-
-logger = logging.getLogger(__name__)
 
 re_flags = re.UNICODE | re.IGNORECASE | re.DOTALL
 
@@ -67,10 +67,28 @@ def admin(func):
 
 
 def main():
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        colorize=config.get("logger.colorize", True),
+        format=config.get(
+            "logger.format",
+            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+            "<level>{level}</level> | "
+            "{message}",
+        ),
+        level=config.get("logger.level", "INFO"),
+    )
+
     sentry_dsn = config.get("sentry.dsn")
     if sentry_dsn:
         sentry_sdk.init(
-            sentry_dsn, release=meta.VERSION, before_send=sentry_before_send
+            sentry_dsn,
+            release=meta.VERSION,
+            before_send=sentry_before_send,
+            integrations=[
+                LoguruIntegration(),
+            ],
         )
 
     token = config.get("telegram.token")
@@ -82,6 +100,7 @@ def main():
     app.add_handler(MessageHandler(filters.FORWARDED, chat_filter))
 
     if not config.get("webhook.enabled", False):
+        logger.info("Running in polling mode.")
         app.run_polling()
     else:
         listen_addr = config.get("webhook.listen", "0.0.0.0")  # noqa: S104
@@ -91,6 +110,7 @@ def main():
         url = f"{url_base}{url_path}"
         secret_token = secrets.token_hex()
 
+        logger.info(f"Running in webhook mode ({url_base}{url_path}).")
         app.run_webhook(
             listen=listen_addr,
             port=port,
@@ -98,8 +118,6 @@ def main():
             url_path=url_path,
             secret_token=secret_token,
         )
-
-    logger.info("Ready!")
 
 
 @admin

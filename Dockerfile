@@ -52,7 +52,7 @@ RUN --mount=type=cache,target=/root/.cache \
 
 
 ## Production image
-FROM python-base as production
+FROM python-base as app-base
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=private \
     apt-get update && \
@@ -66,10 +66,30 @@ COPY gentoogram ./gentoogram
 
 ENV ROOT_PATH_FOR_DYNACONF="/config" \
     INSTANCE_FOR_DYNACONF="gentoogram.__main__.config" \
-    ENV_FOR_DYNACONF=production
+    ENV_FOR_DYNACONF=production \
+    CFG_LOGGER__LEVEL="INFO"
 
 VOLUME ["/config"]
 
-HEALTHCHECK --start-interval=1s --start-period=10s --interval=10s --timeout=5s CMD ["/docker-healthcheck.sh"]
-
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+
+## Dev image
+FROM app-base as development
+
+COPY --from=python-builder-base ${POETRY_HOME} ${POETRY_HOME}
+COPY poetry.lock pyproject.toml ./
+
+RUN --mount=type=cache,target=/root/.cache \
+    poetry install --no-root
+
+ENV ENV_FOR_DYNACONF=development \
+    CFG_LOGGER__LEVEL="DEBUG"
+
+
+## Production image
+FROM app-base as production
+
+ENV ENV_FOR_DYNACONF=production
+
+HEALTHCHECK --start-interval=1s --start-period=10s --interval=10s --timeout=5s CMD ["/docker-healthcheck.sh"]

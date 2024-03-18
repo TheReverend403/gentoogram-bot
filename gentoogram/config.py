@@ -13,14 +13,12 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 import os
 
 from dynaconf import Dynaconf, ValidationError, Validator
+from loguru import logger
 
-from gentoogram import BASE_DIR
-
-logger = logging.getLogger(__name__)
+from gentoogram.paths import BASE_DIR
 
 CONFIG_DIR = os.getenv("ROOT_PATH_FOR_DYNACONF", BASE_DIR / "config")
 

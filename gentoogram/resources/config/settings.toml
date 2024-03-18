@@ -4,24 +4,30 @@ chat_id = ""
 admin_id = ""
 
 # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks
-[webhook]
-enabled = false
-listen = "0.0.0.0"
-port = 3020
-url_base = "https://example.com"
-url_path = "/"
+# [webhook]
+# enabled = false
+# listen = "0.0.0.0"
+# port = 3020
+# url_base = "https://example.com"
+# url_path = "/"
 
-[filters]
+# [filters]
 # Ban users whose name matches any of a list of regexes when they join.
-usernames = []
+# usernames = []
 # Delete messages matching any of a list of regexes. Doesn't ban the user.
-messages = []
+# messages = []
 
-[sentry]
 # https://docs.sentry.io/product/sentry-basics/concepts/dsn-explainer/#where-to-find-your-dsn
-dsn = ""
+# [sentry]
+# dsn = ""
 
 # Ban users on join when they have at least [threshold] bans on https://cas.chat.
-[cas]
-enabled = false
-threshold = 1
+# [cas]
+# enabled = false
+# threshold = 1
+
+# https://github.com/Delgan/loguru
+# [logger]
+# level = "INFO"
+# colorize = true
+# format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
