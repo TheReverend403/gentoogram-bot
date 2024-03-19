@@ -153,6 +153,7 @@ async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
     await update.effective_chat.send_message(
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=True,
+        reply_to_message_id=update.effective_message.id,
         text=f"<a href='https://github.com/TheReverend403/gentoogram-bot'>gentoogram-bot {meta.VERSION}</a>",
     )
 
