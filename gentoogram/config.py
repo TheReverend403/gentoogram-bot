@@ -39,7 +39,8 @@ config.validators.register(
         len_min=1,
         is_type_of=str,
     ),
-    Validator("telegram.chat_id", "telegram.admin_id", must_exist=True, is_type_of=int),
+    Validator("telegram.chat_id", must_exist=True, is_type_of=int),
+    Validator("telegram.admins", must_exist=True, is_type_of=list),
     Validator(
         "webhook.enabled",
         is_type_of=bool,

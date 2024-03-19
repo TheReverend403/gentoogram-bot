@@ -1,7 +1,7 @@
 [telegram]
 token = ""
 chat_id = ""
-admin_id = ""
+admins = []
 
 # https://github.com/python-telegram-bot/python-telegram-bot/wiki/Webhooks
 # [webhook]

@@ -54,7 +54,7 @@ def admin(func):
         update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
     ):
         user = update.effective_user
-        if user.id != config.get("telegram.admin_id"):
+        if user.id not in config.get("telegram.admins"):
             logger.info(
                 f"{user.full_name} ({user.id}) was denied access to {func.__name__}"
             )
