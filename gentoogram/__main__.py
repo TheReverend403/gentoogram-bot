@@ -22,8 +22,8 @@ import httpx
 import sentry_sdk
 from loguru import logger
 from sentry_sdk.integrations.loguru import LoguruIntegration
-from telegram import Chat, Update
-from telegram.constants import ParseMode
+from telegram import Update, User
+from telegram.constants import ChatAction, ParseMode
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import (
     ApplicationBuilder,
@@ -53,17 +53,33 @@ def admin(func):
     async def wrapped(
         update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
     ):
-        user_id = update.effective_user.id
-        if user_id != config.get("telegram.admin_id"):
-            logger.debug(f"User {user_id} was denied access to {func.__name__}")
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
+        user = update.effective_user
+        if user.id != config.get("telegram.admin_id"):
+            logger.info(
+                f"{user.full_name} ({user.id}) was denied access to {func.__name__}"
+            )
+            await update.effective_chat.send_message(
+                reply_to_message_id=update.effective_message.id,
                 text="That command can only be used by bot admins. Which you are not.",
             )
             return None
         return await func(update, context, *args, **kwargs)
 
     return wrapped
+
+
+def send_action(action: ChatAction):
+    def decorator(func):
+        @wraps(func)
+        async def command_func(
+            update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
+        ):
+            await update.effective_chat.send_chat_action(action=action)
+            return await func(update, context, *args, **kwargs)
+
+        return command_func
+
+    return decorator
 
 
 def main():
@@ -100,7 +116,7 @@ def main():
     app.add_handler(MessageHandler(filters.FORWARDED, chat_filter))
 
     if not config.get("webhook.enabled", False):
-        logger.info("Running in polling mode.")
+        logger.info("Running in polling mode")
         app.run_polling()
     else:
         listen_addr = config.get("webhook.listen", "0.0.0.0")  # noqa: S104
@@ -110,7 +126,7 @@ def main():
         url = f"{url_base}{url_path}"
         secret_token = secrets.token_hex()
 
-        logger.info(f"Running in webhook mode ({url_base}{url_path}).")
+        logger.info(f"Running in webhook mode ({url_base}{url_path})")
         app.run_webhook(
             listen=listen_addr,
             port=port,
@@ -121,42 +137,34 @@ def main():
 
 
 @admin
+@send_action(ChatAction.TYPING)
 async def cmd_reload(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: ARG001
     config.reload()
-    logger.debug("Config reloaded.")
-    reply_to = (
-        update.effective_message.id
-        if update.effective_chat.type != Chat.PRIVATE
-        else None
-    )
+    user = update.effective_user
+    logger.info(f"Config reloaded by {user.full_name} ({user.id})")
     await update.effective_chat.send_message(
-        reply_to_message_id=reply_to,
-        text="Config reloaded!",
+        reply_to_message_id=update.effective_message.id,
+        text="Success!",
     )
 
 
+@send_action(ChatAction.TYPING)
 async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: ARG001
-    reply_to = (
-        update.effective_message.id
-        if update.effective_chat.type != Chat.PRIVATE
-        else None
-    )
     await update.effective_chat.send_message(
-        reply_to_message_id=reply_to,
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=True,
         text=f"<a href='https://github.com/TheReverend403/gentoogram-bot'>gentoogram-bot {meta.VERSION}</a>",
     )
 
 
-async def is_spammer(user_id: int) -> bool:
-    if not config.get("cas.enabled", True):
-        return True
+async def is_spammer(user: User) -> bool:
+    if not config.get("cas.enabled", False):
+        return False
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"https://api.cas.chat/check?user_id={user_id}", timeout=5
+                f"https://api.cas.chat/check?user_id={user.id}", timeout=5
             )
             check_result = response.json()
     except (httpx.HTTPError, httpx.TimeoutException) as exc:
@@ -167,7 +175,7 @@ async def is_spammer(user_id: int) -> bool:
         offenses = check_result.get("result").get("offenses")
         if offenses >= config.get("cas.threshold", 1):
             logger.info(
-                f"User {user_id} failed CAS spam check with {offenses} offense(s)."
+                f"[CAS] {user.full_name} ({user.id}) failed check with {offenses} offense(s)"
             )
             return True
 
@@ -186,45 +194,46 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         return
 
     user = update.effective_user
-    username = user.username if user.username else ""
-
-    full_name = f"{user.first_name}"
-    if user.last_name:
-        full_name += f" {user.last_name}"
 
     log_data = {
         "user": {
             "id": user.id,
-            "username": username,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
+            "username": user.username,
+            "full_name": user.full_name,
         },
         "chat": {"id": chat.id, "type": chat.type, "username": chat.username},
     }
 
     _filters = config.get("filters")
     for pattern in _filters.get("usernames"):
-        if re.search(pattern, full_name, re_flags) or re.search(
-            pattern, username, re_flags
+        if re.search(pattern, user.full_name, re_flags) or re.search(
+            pattern, user.username, re_flags
         ):
             log_data.update({"regex": pattern})
             logger.info(f"Username filter match: {log_data}")
 
-            if await chat.ban_member(user.id) and await message.delete():
-                logger.info(f"Banned user {user.id}.")
+            if await chat.ban_member(user.id):
+                logger.info(f"Banned {user.id}")
             else:
-                logger.info(f"Could not kick user {user.id}.")
+                logger.info(f"Failed to ban {user.id}")
+
+            if not await message.delete():
+                logger.warning(f"Failed to delete message {message.id}")
 
             break
 
     # This is a new chat member event.
     if not message.text:
-        if await is_spammer(user.id):
-            logger.info(f"CAS check match: {log_data}")
-            if await chat.ban_member(user.id) and await message.delete():
-                logger.info(f"Kicked user {user.id} (CAS).")
+        if await is_spammer(user):
+            logger.debug(f"CAS match: {log_data}")
+            if await chat.ban_member(user.id):
+                logger.info(f"[CAS] Banned {user.id}")
             else:
-                logger.info(f"Could not kick user {user.id} (CAS).")
+                logger.warning(f"[CAS] Failed to ban {user.id}")
+
+            if not await message.delete():
+                logger.warning(f"[CAS] Failed to delete message {message.id}")
+
             return
         return
 
@@ -232,15 +241,15 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         if re.search(pattern, message.text, re_flags):
             log_data.update(
                 {
-                    "message": {"id": message.message_id, "text": message.text},
+                    "message": {"id": message.id, "text": message.text},
                     "regex": pattern,
                 }
             )
             logger.info(f"Message filter match: {log_data}")
             if await message.delete():
-                logger.info(f"Deleted message {message.message_id}")
+                logger.info(f"Deleted message {message.id}")
             else:
-                logger.info(f"Could not delete message {message.message_id}")
+                logger.warning(f"Failed to delete message {message.id}")
             break
 
 
