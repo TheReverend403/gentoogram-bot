@@ -16,7 +16,6 @@
 import re
 import secrets
 import sys
-from functools import wraps
 
 import httpx
 import sentry_sdk
@@ -35,8 +34,9 @@ from telegram.ext import (
 
 from gentoogram import meta
 from gentoogram.config import config
+from gentoogram.decorators import admin, send_action
 
-re_flags = re.UNICODE | re.IGNORECASE | re.DOTALL
+REGEX_FLAGS = re.UNICODE | re.IGNORECASE | re.DOTALL
 
 
 def sentry_before_send(event, hint):
@@ -46,40 +46,6 @@ def sentry_before_send(event, hint):
             return None
 
     return event
-
-
-def admin(func):
-    @wraps(func)
-    async def wrapped(
-        update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
-    ):
-        user = update.effective_user
-        if user.id not in config.get("telegram.admins"):
-            logger.info(
-                f"{user.full_name} ({user.id}) was denied access to {func.__name__}"
-            )
-            await update.effective_chat.send_message(
-                reply_to_message_id=update.effective_message.id,
-                text="That command can only be used by bot admins. Which you are not.",
-            )
-            return None
-        return await func(update, context, *args, **kwargs)
-
-    return wrapped
-
-
-def send_action(action: ChatAction):
-    def decorator(func):
-        @wraps(func)
-        async def command_func(
-            update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs
-        ):
-            await update.effective_chat.send_chat_action(action=action)
-            return await func(update, context, *args, **kwargs)
-
-        return command_func
-
-    return decorator
 
 
 def main():
@@ -111,9 +77,12 @@ def main():
     app = ApplicationBuilder().token(token).build()
     app.add_handler(CommandHandler("reload", cmd_reload))
     app.add_handler(CommandHandler("version", cmd_version))
-    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, chat_filter))
-    app.add_handler(MessageHandler(filters.TEXT, chat_filter))
-    app.add_handler(MessageHandler(filters.FORWARDED, chat_filter))
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT | filters.FORWARDED | filters.StatusUpdate.NEW_CHAT_MEMBERS,
+            chat_filter,
+        )
+    )
 
     if not config.get("webhook.enabled", False):
         logger.info("Running in polling mode")
@@ -159,7 +128,7 @@ async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
 
 
 async def is_spammer(user: User) -> bool:
-    if not config.get("cas.enabled", False):
+    if not config.get("cas.enabled"):
         return False
 
     try:
@@ -174,7 +143,7 @@ async def is_spammer(user: User) -> bool:
 
     if check_result.get("ok"):
         offenses = check_result.get("result").get("offenses")
-        if offenses >= config.get("cas.threshold", 1):
+        if offenses >= config.get("cas.threshold"):
             logger.info(
                 f"[CAS] {user.full_name} ({user.id}) failed check with {offenses} offense(s)"
             )
@@ -207,8 +176,8 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
 
     _filters = config.get("filters")
     for pattern in _filters.get("usernames"):
-        if re.search(pattern, user.full_name, re_flags) or re.search(
-            pattern, user.username, re_flags
+        if re.search(pattern, user.full_name, REGEX_FLAGS) or re.search(
+            pattern, user.username, REGEX_FLAGS
         ):
             log_data.update({"regex": pattern})
             logger.info(f"Username filter match: {log_data}")
@@ -223,8 +192,7 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
 
             break
 
-    # This is a new chat member event.
-    if not message.text:
+    if message.new_chat_members:
         if await is_spammer(user):
             if await chat.ban_member(user.id):
                 logger.info(f"[CAS] Banned {user.id}")
@@ -233,12 +201,10 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
 
             if not await message.delete():
                 logger.warning(f"[CAS] Failed to delete message {message.id}")
-
-            return
         return
 
     for pattern in _filters.get("messages"):
-        if re.search(pattern, message.text, re_flags):
+        if re.search(pattern, message.text, REGEX_FLAGS):
             log_data.update(
                 {
                     "message": {"id": message.id, "text": message.text},
