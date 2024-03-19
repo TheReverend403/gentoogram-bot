@@ -100,6 +100,24 @@ config.validators.register(
         must_exist=True,
         when=Validator("cas.enabled", eq=True),
     ),
+    Validator(
+        "logger.level",
+        is_type_of=str,
+        default="INFO",
+        apply_default_on_none=True,
+    )
+    & Validator(
+        "logger.format",
+        is_type_of=str,
+        default="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
+        apply_default_on_none=True,
+    )
+    & Validator(
+        "logger.colorize",
+        is_type_of=bool,
+        default=True,
+        apply_default_on_none=True,
+    ),
 )
 
 try:

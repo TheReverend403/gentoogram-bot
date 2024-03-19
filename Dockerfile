@@ -65,9 +65,7 @@ COPY docker/rootfs /
 COPY gentoogram ./gentoogram
 
 ENV ROOT_PATH_FOR_DYNACONF="/config" \
-    INSTANCE_FOR_DYNACONF="gentoogram.__main__.config" \
-    ENV_FOR_DYNACONF=production \
-    CFG_LOGGER__LEVEL="INFO"
+    INSTANCE_FOR_DYNACONF="gentoogram.__main__.config"
 
 VOLUME ["/config"]
 
@@ -90,6 +88,7 @@ ENV ENV_FOR_DYNACONF=development \
 ## Production image
 FROM app-base as production
 
-ENV ENV_FOR_DYNACONF=production
+ENV ENV_FOR_DYNACONF=production \
+    CFG_LOGGER__LEVEL="INFO"
 
 HEALTHCHECK --start-interval=1s --start-period=10s --interval=10s --timeout=5s CMD ["/docker-healthcheck.sh"]

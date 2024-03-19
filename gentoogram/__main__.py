@@ -49,18 +49,9 @@ def sentry_before_send(event, hint):
 
 
 def main():
+    logger_config = {key.lower(): val for key, val in config.get("logger").items()}
     logger.remove()
-    logger.add(
-        sys.stderr,
-        colorize=config.get("logger.colorize", True),
-        format=config.get(
-            "logger.format",
-            "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-            "<level>{level}</level> | "
-            "{message}",
-        ),
-        level=config.get("logger.level", "INFO"),
-    )
+    logger.add(sys.stderr, **dict(logger_config))
 
     sentry_dsn = config.get("sentry.dsn")
     if sentry_dsn:

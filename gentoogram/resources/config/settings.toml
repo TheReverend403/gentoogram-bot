@@ -29,5 +29,5 @@ admins = []
 # https://github.com/Delgan/loguru
 # [logger]
 # level = "INFO"
-# colorize = true
 # format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}"
+# colorize = true
