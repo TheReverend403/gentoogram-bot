@@ -225,7 +225,6 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
     # This is a new chat member event.
     if not message.text:
         if await is_spammer(user):
-            logger.debug(f"CAS match: {log_data}")
             if await chat.ban_member(user.id):
                 logger.info(f"[CAS] Banned {user.id}")
             else:
