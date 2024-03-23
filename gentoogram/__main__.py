@@ -168,7 +168,7 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
     _filters = config.get("filters")
     for pattern in _filters.get("usernames"):
         if re.search(pattern, user.full_name, REGEX_FLAGS) or re.search(
-            pattern, user.username, REGEX_FLAGS
+            pattern, user.username or "", REGEX_FLAGS
         ):
             log_data.update({"regex": pattern})
             logger.info(f"Username filter match: {log_data}")
