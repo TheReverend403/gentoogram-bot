@@ -33,7 +33,7 @@ config = Dynaconf(
 )
 
 
-def get_logging_config(_config: Dynaconf) -> dict:
+def _get_logging_config(_config: Dynaconf) -> dict:
     return {
         "version": 1,
         "formatters": {
@@ -57,7 +57,7 @@ def get_logging_config(_config: Dynaconf) -> dict:
     }
 
 
-logging.config.dictConfig(get_logging_config(config))
+logging.config.dictConfig(_get_logging_config(config))
 logger = logging.getLogger(__name__)
 
 config.validators.register(
@@ -144,7 +144,7 @@ config.validators.register(
 
 try:
     config.validators.validate_all()
-    logging.config.dictConfig(get_logging_config(config))
+    logging.config.dictConfig(_get_logging_config(config))
 except ValidationError as exc:
     logger.error(exc.message)
     raise SystemExit(1) from exc
