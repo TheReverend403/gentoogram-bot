@@ -195,7 +195,7 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         return
 
     for pattern in _filters.get("messages"):
-        if re.search(pattern, message.text, REGEX_FLAGS):
+        if re.search(pattern, message.text or "", REGEX_FLAGS):
             log_data.update(
                 {
                     "message": {"id": message.id, "text": message.text},
