@@ -42,6 +42,7 @@ LOGGING_CONFIG = {
             "level": config.get("logger.level"),
             "formatter": "standard",
             "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
         },
     },
     "loggers": {
