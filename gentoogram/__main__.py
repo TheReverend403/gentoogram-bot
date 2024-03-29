@@ -155,11 +155,12 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         return
 
     user = update.effective_user
+    username = user.username or ""
 
     log_data = {
         "user": {
             "id": user.id,
-            "username": user.username,
+            "username": username,
             "full_name": user.full_name,
         },
         "chat": {"id": chat.id, "type": chat.type, "username": chat.username},
@@ -168,7 +169,7 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
     _filters = config.get("filters")
     for pattern in _filters.get("usernames"):
         if re.search(pattern, user.full_name, REGEX_FLAGS) or re.search(
-            pattern, user.username or "", REGEX_FLAGS
+            pattern, username, REGEX_FLAGS
         ):
             log_data.update({"regex": pattern})
             logger.info(f"Username filter match: {log_data}")
@@ -194,8 +195,11 @@ async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
                 logger.warning(f"[CAS] Failed to delete message {message.id}")
         return
 
+    if not message.text:
+        return
+
     for pattern in _filters.get("messages"):
-        if re.search(pattern, message.text or "", REGEX_FLAGS):
+        if re.search(pattern, message.text, REGEX_FLAGS):
             log_data.update(
                 {
                     "message": {"id": message.id, "text": message.text},
