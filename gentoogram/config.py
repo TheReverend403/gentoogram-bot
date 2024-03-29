@@ -32,28 +32,32 @@ config = Dynaconf(
     ],
 )
 
-LOGGING_CONFIG = {
-    "version": 1,
-    "formatters": {
-        "standard": {"format": config.get("logger.format")},
-    },
-    "handlers": {
-        "default": {
-            "level": config.get("logger.level"),
-            "formatter": "standard",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stdout",
-        },
-    },
-    "loggers": {
-        "": {
-            "handlers": ["default"],
-            "level": config.get("logger.level"),
-        },
-    },
-}
 
-logging.config.dictConfig(LOGGING_CONFIG)
+def get_logging_config(_config: Dynaconf) -> dict:
+    return {
+        "version": 1,
+        "formatters": {
+            "standard": {"format": _config.get("logger.format")},
+        },
+        "handlers": {
+            "default": {
+                "level": _config.get("logger.level"),
+                "formatter": "standard",
+                "class": "logging.StreamHandler",
+                "stream": "ext://sys.stdout",
+            },
+        },
+        "loggers": {
+            "": {
+                "handlers": ["default"],
+                "level": _config.get("logger.level"),
+                "propagate": False,
+            },
+        },
+    }
+
+
+logging.config.dictConfig(get_logging_config(config))
 logger = logging.getLogger(__name__)
 
 config.validators.register(
@@ -140,6 +144,7 @@ config.validators.register(
 
 try:
     config.validators.validate_all()
+    logging.config.dictConfig(get_logging_config(config))
 except ValidationError as exc:
     logger.error(exc.message)
     raise SystemExit(1) from exc
