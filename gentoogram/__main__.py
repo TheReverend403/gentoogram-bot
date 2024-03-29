@@ -13,14 +13,13 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging.config
 import re
 import secrets
-import sys
 
 import httpx
 import sentry_sdk
-from loguru import logger
-from sentry_sdk.integrations.loguru import LoguruIntegration
+from dynaconf import ValidationError
 from telegram import Update, User
 from telegram.constants import ChatAction, ParseMode
 from telegram.error import NetworkError, TelegramError
@@ -36,38 +35,34 @@ from gentoogram import meta
 from gentoogram.config import config
 from gentoogram.decorators import admin, send_action
 
+logger = logging.getLogger(__name__)
+
 REGEX_FLAGS = re.UNICODE | re.IGNORECASE | re.DOTALL
 
 
 def sentry_before_send(event, hint):
     if "exc_info" in hint:
         exc_type, exc_value, tb = hint["exc_info"]
-        if isinstance(exc_value, TelegramError | NetworkError):
+        if isinstance(exc_value, TelegramError | NetworkError | ValidationError):
             return None
 
     return event
 
 
 def main():
-    logger_config = {key.lower(): val for key, val in config.get("logger").items()}
-    logger.remove()
-    logger.add(sys.stderr, **dict(logger_config))
-
     sentry_dsn = config.get("sentry.dsn")
     if sentry_dsn:
         sentry_sdk.init(
             sentry_dsn,
             release=meta.VERSION,
             before_send=sentry_before_send,
-            integrations=[
-                LoguruIntegration(),
-            ],
         )
 
     token = config.get("telegram.token")
     app = ApplicationBuilder().token(token).build()
     app.add_handler(CommandHandler("reload", cmd_reload))
     app.add_handler(CommandHandler("version", cmd_version))
+    app.add_handler(CommandHandler("ping", cmd_ping))
     app.add_handler(
         MessageHandler(
             filters.TEXT | filters.FORWARDED | filters.StatusUpdate.NEW_CHAT_MEMBERS,
@@ -115,6 +110,14 @@ async def cmd_version(update: Update, context: ContextTypes.DEFAULT_TYPE):  # no
         disable_web_page_preview=True,
         reply_to_message_id=update.effective_message.id,
         text=f"<a href='{meta.SOURCE}'>gentoogram-bot {meta.VERSION}</a>",
+    )
+
+
+@send_action(ChatAction.TYPING)
+async def cmd_ping(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: ARG001
+    await update.effective_chat.send_message(
+        reply_to_message_id=update.effective_message.id,
+        text="Pong!",
     )
 
 

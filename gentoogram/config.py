@@ -13,10 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging.config
 import os
 
 from dynaconf import Dynaconf, ValidationError, Validator
-from loguru import logger
 
 from gentoogram.paths import BASE_DIR
 
@@ -31,6 +31,29 @@ config = Dynaconf(
         "*.yaml",
     ],
 )
+
+LOGGING_CONFIG = {
+    "version": 1,
+    "formatters": {
+        "standard": {"format": config.get("logger.format")},
+    },
+    "handlers": {
+        "default": {
+            "level": config.get("logger.level"),
+            "formatter": "standard",
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["default"],
+            "level": config.get("logger.level"),
+        },
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
+logger = logging.getLogger(__name__)
 
 config.validators.register(
     Validator(
@@ -109,13 +132,7 @@ config.validators.register(
     & Validator(
         "logger.format",
         is_type_of=str,
-        default="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
-        apply_default_on_none=True,
-    )
-    & Validator(
-        "logger.colorize",
-        is_type_of=bool,
-        default=True,
+        default="%(asctime)s | %(levelname)s | %(name)s: %(message)s",
         apply_default_on_none=True,
     ),
 )

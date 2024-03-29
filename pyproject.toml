@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "gentoogram-bot"
-version = "0.8.2"
+version = "0.8.3"
 description = ""
 authors = ["Lee Watson <me@lwatson.dev>"]
 license = "GPL-3.0"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-sentry-sdk = {extras = ["loguru"], version = "^1.43.0"}
+sentry-sdk = "^1.43.0"
 dynaconf = { extras = ["yaml"], version = "^3.2.4" }
 python-telegram-bot = {version = "^21.0.1", extras = ["webhooks"]}
 

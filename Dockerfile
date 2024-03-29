@@ -88,7 +88,6 @@ ENV ENV_FOR_DYNACONF=development \
 ## Production image
 FROM app-base as production
 
-ENV ENV_FOR_DYNACONF=production \
-    CFG_LOGGER__LEVEL="INFO"
+ENV ENV_FOR_DYNACONF=production
 
 HEALTHCHECK --start-interval=1s --start-period=10s --interval=10s --timeout=5s CMD ["/docker-healthcheck.sh"]
