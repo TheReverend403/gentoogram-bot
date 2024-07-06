@@ -42,7 +42,7 @@ REGEX_FLAGS = re.UNICODE | re.IGNORECASE | re.DOTALL
 
 def sentry_before_send(event, hint):
     if "exc_info" in hint:
-        exc_type, exc_value, tb = hint["exc_info"]
+        _, exc_value, _ = hint["exc_info"]
         if isinstance(exc_value, TelegramError | NetworkError | ValidationError):
             return None
 
@@ -126,7 +126,7 @@ async def is_spammer(user: User) -> bool:
         return False
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=5) as client:
             response = await client.get(
                 f"https://api.cas.chat/check?user_id={user.id}", timeout=5
             )
