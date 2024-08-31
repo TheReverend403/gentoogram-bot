@@ -54,12 +54,6 @@ RUN --mount=type=cache,target=/root/.cache \
 ## Production image
 FROM python-base as app-base
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=private \
-    apt-get update && \
-    apt-get install --no-install-recommends -y \
-    curl && \
-    apt-get autoclean && rm -rf /var/lib/apt/lists/*
-
 COPY --from=python-builder-base ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY docker/rootfs /
 COPY gentoogram ./gentoogram
@@ -90,5 +84,3 @@ FROM app-base as production
 
 ENV ENV_FOR_DYNACONF=production \
     CFG_LOGGER__LEVEL="INFO"
-
-HEALTHCHECK --start-interval=1s --start-period=10s --interval=10s --timeout=5s CMD ["/docker-healthcheck.sh"]
