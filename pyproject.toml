@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "gentoogram-bot"
-version = "0.8.4"
+version = "0.8.5"
 description = ""
 authors = ["Lee Watson <me@lwatson.dev>"]
 license = "GPL-3.0"
 package-mode = false
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.13"
 sentry-sdk = "^2.8.0"
 dynaconf = { extras = ["yaml"], version = "^3.2.4" }
 python-telegram-bot = { version = "^21.0.1", extras = ["webhooks"] }
@@ -19,7 +19,7 @@ ruff = "^0.6.0"
 shellcheck-py = "^0.10.0.1"
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py313"
 force-exclude = true
 
 [tool.ruff.lint]
@@ -64,5 +64,5 @@ extend-ignore = ["PLR09"]
 line-ending = "lf"
 
 [build-system]
-requires = ["poetry>=1.3.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
