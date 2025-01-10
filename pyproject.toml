@@ -13,9 +13,9 @@ dynaconf = { extras = ["yaml"], version = "^3.2.4" }
 python-telegram-bot = { version = "^21.0.1", extras = ["webhooks"] }
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.5.0"
-pre-commit-hooks = "^4.5.0"
-ruff = "^0.8.0"
+pre-commit = "^4.0.0"
+pre-commit-hooks = "^5.0.0"
+ruff = "^0.9.0"
 shellcheck-py = "^0.10.0.1"
 
 [tool.ruff]
