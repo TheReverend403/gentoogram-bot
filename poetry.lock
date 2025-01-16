@@ -545,5 +545,5 @@ dev = ["pre-commit", "pre-commit-hooks", "ruff", "shellcheck-py"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.13"
-content-hash = "297cab59f9c8f52409cf5ea164702e59b21e32095fbedc1e9931b8e7a18b85f8"
+python-versions = ">=3.13,<3.14"
+content-hash = "86e3f8b56a9bb0578281a8d21b2b465798e025fe470fd23cc776cab3782695ce"
