@@ -14,7 +14,7 @@ First, install [uv](https://docs.astral.sh/uv/getting-started/installation/).
 git clone https://github.com/TheReverend403/gentoogram-bot
 cd gentoogram-bot
 
-uv sync --all-groups
+uv sync --group dev
 uv run pre-commit install
 ```
 
