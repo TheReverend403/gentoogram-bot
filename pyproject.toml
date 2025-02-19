@@ -2,7 +2,7 @@
 name = "gentoogram-bot"
 description = ""
 authors = [{ name = "Lee Watson", email = "me@lwatson.dev" }]
-version = "0.8.5"
+version = "0.9.0"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13,<3.14"
