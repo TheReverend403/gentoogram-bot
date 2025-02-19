@@ -6,12 +6,23 @@
 
 Just a bot for the [@Gentoogram](https://t.me/Gentoogram) Telegram group. It filters chat with regex and stuff.
 
-## Using
+## Setting up the development environment
+
+First, install [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```sh
-uv sync
-mkdir config/
-cp gentoogram/resources/config/settings.yml config/
-$EDITOR config/settings.yml
+git clone https://github.com/TheReverend403/gentoogram-bot
+cd gentoogram-bot
+
+uv sync --all-groups
+uv run pre-commit install
+```
+
+## Running
+
+```sh
+mkdir config
+cp gentoogram/resources/config/settings.toml config/ # Edit settings.toml
+
 uv run -m gentoogram
 ```
