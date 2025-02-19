@@ -60,8 +60,6 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 ## Dev image
 FROM app-base AS development
 
-COPY --from=python-builder-base ${POETRY_HOME} ${POETRY_HOME}
-
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
