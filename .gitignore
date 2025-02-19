@@ -1,9 +1,9 @@
 /config
 
-.vscode
-.idea
+docker-compose.*
 
-/docker-compose.*
+.vscode/
+.idea/
 
 .ruff_cache/
 
