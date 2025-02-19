@@ -3,7 +3,8 @@ name = "gentoogram-bot"
 description = ""
 authors = [{ name = "Lee Watson", email = "me@lwatson.dev" }]
 version = "0.8.5"
-license = "GPL-3.0-only"
+readme = "README.md"
+license = { file = "LICENSE" }
 requires-python = ">=3.13,<3.14"
 dependencies = [
     "sentry-sdk (>=2.8.0,<3.0.0)",
@@ -11,7 +12,7 @@ dependencies = [
     "python-telegram-bot[webhooks] (>=21.0.1,<22.0.0)",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pre-commit (>=4.0.0,<5.0.0)",
     "pre-commit-hooks (>=5.0.0,<6.0.0)",
@@ -66,7 +67,3 @@ extend-ignore = ["PLR09"]
 
 [tool.ruff.format]
 line-ending = "lf"
-
-[build-system]
-requires = ["poetry-core>=2.0"]
-build-backend = "poetry.core.masonry.api"
