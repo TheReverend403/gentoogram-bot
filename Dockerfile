@@ -27,12 +27,6 @@ WORKDIR /app
 ## Python builder
 FROM python-base AS python-builder-base
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=private \
-    apt-get update && \
-    apt-get install --no-install-recommends -y \
-    curl \
-    && apt-get autoclean && rm -rf /var/lib/apt/lists/*
-
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
@@ -68,7 +62,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 ENV ENV_FOR_DYNACONF=development \
     CFG_LOGGER__LEVEL="DEBUG"
-
 
 ## Production image
 FROM app-base AS production
