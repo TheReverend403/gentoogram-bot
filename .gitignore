@@ -1,6 +1,5 @@
-/config
-
-docker-compose.*
+docker/data
+docker/config
 
 .vscode/
 .idea/

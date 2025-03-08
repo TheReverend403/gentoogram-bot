@@ -1,0 +1,20 @@
+services:
+  gentoogram-bot:
+    container_name: gentoogram-bot
+    restart: "no"
+    init: true
+    read_only: true
+    user: ${PUID:-1000}:${PGID:-1000}
+    env_file:
+      - .env
+    environment:
+      CFG_TELEGRAM__ADMINS: ${CFG_TELEGRAM__ADMINS:?}
+      CFG_TELEGRAM__CHAT_ID: ${CFG_TELEGRAM__CHAT_ID:?}
+      CFG_TELEGRAM__TOKEN: ${CFG_TELEGRAM__TOKEN:?}
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${BASE_DIR:-.}/config/app:/config
+      - ../:/app:ro
+    build:
+      context: ../
+      target: development
