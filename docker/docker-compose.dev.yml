@@ -17,6 +17,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ${BASE_DIR:-.}/config/app:/config
       - ../:/app:ro
+    networks:
+      - gentoogram-bot
     build:
       context: ../
       target: development
