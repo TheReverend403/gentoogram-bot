@@ -20,3 +20,6 @@ services:
     build:
       context: ../
       target: development
+
+networks:
+  gentoogram-bot:
