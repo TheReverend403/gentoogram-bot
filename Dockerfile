@@ -62,6 +62,7 @@ RUN --mount=type=cache,target=${UV_CACHE_DIR} \
 ENV ENV_FOR_DYNACONF=development \
     CFG_LOGGER__LEVEL="DEBUG"
 
+
 ## Production image
 FROM app-base AS production
 
