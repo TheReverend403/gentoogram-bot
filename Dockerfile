@@ -8,6 +8,7 @@ FROM debian:${DEBIAN_VERSION}-slim AS python-base
 ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
+    UV_FROZEN=1 \
     UV_PROJECT_ENVIRONMENT="/opt/uv/venv" \
     UV_PYTHON_INSTALL_DIR="/opt/uv/python" \
     UV_CACHE_DIR="/opt/uv/cache"
@@ -15,7 +16,13 @@ ENV PYTHONUNBUFFERED=1 \
 ENV PATH="${UV_PROJECT_ENVIRONMENT}/bin:${PATH}" \
     PYTHONPATH="/app:${PYTHONPATH}"
 
+WORKDIR /app
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+COPY .python-version ./
+
+RUN --mount=type=cache,target=${UV_CACHE_DIR} \
+    uv python install
 
 
 ## Base image
@@ -32,17 +39,12 @@ ENV META_VERSION="${META_VERSION}" \
     SETTINGS_FILES_FOR_DYNACONF='["/app/gentoogram/resources/config/default.toml", "*.toml"]' \
     INSTANCE_FOR_DYNACONF="gentoogram.__main__.config"
 
-WORKDIR /app
+COPY docker/rootfs /
+COPY pyproject.toml uv.lock README.md LICENSE ./
+COPY gentoogram ./gentoogram
 
 RUN --mount=type=cache,target=${UV_CACHE_DIR} \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=README.md,target=README.md \
-    --mount=type=bind,source=LICENSE,target=LICENSE \
-    uv sync --frozen --no-install-project --no-dev
-
-COPY docker/rootfs /
-COPY gentoogram ./gentoogram
+    uv sync --no-install-project --no-dev
 
 VOLUME ["/config"]
 
@@ -56,11 +58,7 @@ ENV ENV_FOR_DYNACONF=development \
     CFG_LOGGER__LEVEL="DEBUG"
 
 RUN --mount=type=cache,target=${UV_CACHE_DIR} \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=README.md,target=README.md \
-    --mount=type=bind,source=LICENSE,target=LICENSE \
-    uv sync --frozen --no-install-project --group dev
+    uv sync --no-install-project --group dev
 
 
 ## Production image
