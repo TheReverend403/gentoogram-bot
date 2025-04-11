@@ -20,18 +20,11 @@ uv run pre-commit install
 
 ## Running in dev mode
 
-### Docker
-
 ```sh
-cp docker/.env.example docker/.env # Open and set any empty variables
+## Env var usage for configuration is documented here: https://www.dynaconf.com/envvars/
+## Env var prefix is set to 'CFG_', not 'DYNACONF_'.
+## Add env vars to 'docker/.env'.
+## You can also copy gentoogram/resources/config/default.toml to docker/config/app/
+cp docker/.env.example docker/.env
 docker compose -f docker/docker-compose.dev.yml up --build --pull always
-```
-
-### Manual
-
-```sh
-mkdir config
-cp gentoogram/resources/config/settings.toml config/ # Edit settings.toml
-
-uv run -m gentoogram
 ```
