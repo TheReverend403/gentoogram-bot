@@ -16,7 +16,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./config/app:/config
-      - ../gentoogram:/app/gentoogram
+      - ../:/app
     networks:
       - gentoogram-bot
     build:
