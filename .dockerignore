@@ -1,0 +1,11 @@
+**
+
+!docker/rootfs/*
+!gentoogram
+!pyproject.toml
+!uv.lock
+!.python-version
+!README.md
+!LICENSE
+
+**/__pycache__

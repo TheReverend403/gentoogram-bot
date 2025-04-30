@@ -2,7 +2,7 @@
 name = "gentoogram-bot"
 description = "Anti-spam bot for https://t.me/Gentoogram"
 authors = [{ name = "Lee Watson", email = "me@lwatson.dev" }]
-version = "0.9.4"
+version = "0.9.5"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13,<3.14"
