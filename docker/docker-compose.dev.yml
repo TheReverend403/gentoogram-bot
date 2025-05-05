@@ -10,11 +10,11 @@ services:
     env_file:
       - .env
     environment:
+      TZ: UTC
       CFG_TELEGRAM__ADMINS: ${CFG_TELEGRAM__ADMINS:?}
       CFG_TELEGRAM__CHAT_ID: ${CFG_TELEGRAM__CHAT_ID:?}
       CFG_TELEGRAM__TOKEN: ${CFG_TELEGRAM__TOKEN:?}
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - ./config/app:/config
       - ../:/app
     networks:
