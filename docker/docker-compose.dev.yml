@@ -1,27 +1,28 @@
-name: gentoogram-bot
+---
+name: "gentoogram-bot"
 
 services:
   gentoogram-bot:
-    container_name: gentoogram-bot
+    container_name: "gentoogram-bot"
     restart: "no"
     init: true
     read_only: true
-    user: ${PUID:-1000}:${PGID:-1000}
+    user: "${PUID:-1000}:${PGID:-1000}"
     env_file:
-      - .env
+      - ".env"
     environment:
-      TZ: UTC
-      CFG_TELEGRAM__ADMINS: ${CFG_TELEGRAM__ADMINS:?}
-      CFG_TELEGRAM__CHAT_ID: ${CFG_TELEGRAM__CHAT_ID:?}
-      CFG_TELEGRAM__TOKEN: ${CFG_TELEGRAM__TOKEN:?}
+      TZ: "UTC"
+      CFG_TELEGRAM__ADMINS: "${CFG_TELEGRAM__ADMINS:?}"
+      CFG_TELEGRAM__CHAT_ID: "${CFG_TELEGRAM__CHAT_ID:?}"
+      CFG_TELEGRAM__TOKEN: "${CFG_TELEGRAM__TOKEN:?}"
     volumes:
-      - ./config/app:/config
-      - ../:/app
+      - "./config/app:/config"
+      - "../:/app"
     networks:
-      - gentoogram-bot
+      - "gentoogram-bot"
     build:
-      context: ../
-      target: development
+      context: "../"
+      target: "development"
 
 networks:
   gentoogram-bot:
