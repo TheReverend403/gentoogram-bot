@@ -146,7 +146,7 @@ async def is_spammer(user: User) -> bool:
     return False
 
 
-async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: C901, ARG001
+async def chat_filter(update: Update, context: ContextTypes.DEFAULT_TYPE):  # noqa: C901, ARG001, PLR0912
     logger.debug(f"{update}")
 
     message = update.effective_message

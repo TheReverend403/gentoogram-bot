@@ -146,5 +146,5 @@ try:
     config.validators.validate_all()
     logging.config.dictConfig(_get_logging_config(config))
 except ValidationError as exc:
-    logger.error(exc.message)
+    logger.exception(exc.message)
     raise SystemExit(1) from exc

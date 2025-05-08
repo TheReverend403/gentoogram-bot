@@ -7,7 +7,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13,<3.14"
 dependencies = [
-    "dynaconf[yaml]>=3.2.10",
+    "dynaconf>=3.2.10",
     "python-telegram-bot[webhooks]>=22.0",
     "sentry-sdk>=2.27.0",
 ]
@@ -25,6 +25,9 @@ dev = [
 force-exclude = true
 extend-exclude = ["docker/data/", "docker/config/"]
 
+[tool.ruff.format]
+line-ending = "lf"
+
 [tool.ruff.lint]
 select = [
     "A",
@@ -33,16 +36,31 @@ select = [
     "BLE",
     "C4",
     "C90",
+    "COM",
     "DTZ",
     "E",
     "ERA",
     "F",
+    "FBT",
     "FIX",
+    "FLY",
     "FURB",
+    "G010",
+    "G101",
+    "G201",
+    "G202",
     "I",
+    "ICN",
+    "INP",
+    "ISC",
+    "LOG",
     "N",
+    "PERF",
+    "PIE",
     "PL",
+    "PT",
     "PTH",
+    "PYI",
     "Q",
     "RET",
     "RSE",
@@ -50,21 +68,34 @@ select = [
     "S",
     "SIM",
     "SLF",
+    "SLOT",
     "T10",
     "T20",
+    "TC",
+    "TD",
     "TID",
+    "TRY",
     "UP",
     "W",
     "YTT",
 ]
 
 # ruff format compatibility
-ignore = ["E501"]
-
-extend-ignore = ["PLR09"]
-
-[tool.ruff.format]
-line-ending = "lf"
+ignore = [
+    "COM812",
+    "COM819",
+    "D206",
+    "D300",
+    "E111",
+    "E114",
+    "E117",
+    "E501",
+    "Q000",
+    "Q001",
+    "Q002",
+    "Q003",
+    "W191",
+]
 
 [tool.yamlfix]
 line_length = 120
