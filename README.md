@@ -26,5 +26,5 @@ uv run pre-commit install
 ## Add env vars to 'docker/.env'.
 ## You can also copy gentoogram/resources/config/default.toml to docker/config/app/
 cp docker/.env.example docker/.env
-docker compose -f docker/docker-compose.dev.yml up --build --pull always
+docker compose -f docker/compose.yaml up --build --pull always
 ```
