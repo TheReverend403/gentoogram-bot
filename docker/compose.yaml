@@ -9,9 +9,12 @@ services:
     read_only: true
     user: "${PUID:-1000}:${PGID:-1000}"
     env_file:
-      - ".env"
+      - path: ".env"
+        required: false
+      - path: "stack.env"
+        required: false
     environment:
-      TZ: "UTC"
+      TZ: "${TZ:-UTC}"
       CFG_TELEGRAM__ADMINS: "${CFG_TELEGRAM__ADMINS:?}"
       CFG_TELEGRAM__CHAT_ID: "${CFG_TELEGRAM__CHAT_ID:?}"
       CFG_TELEGRAM__TOKEN: "${CFG_TELEGRAM__TOKEN:?}"
