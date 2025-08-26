@@ -16,7 +16,7 @@ dependencies = [
 dev = [
     "pre-commit>=4.2.0",
     "pre-commit-hooks>=5.0.0",
-    "ruff>=0.11.7",
+    "ruff>=0.12.0",
     "shellcheck-py>=0.10.0.1",
     "yamlfix>=1.17.0",
 ]
