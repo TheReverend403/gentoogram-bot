@@ -16,11 +16,11 @@
 import logging
 import re
 import secrets
+from typing import TYPE_CHECKING
 
 import httpx
 import sentry_sdk
 from dynaconf import ValidationError
-from telegram import Update, User
 from telegram.constants import ChatAction, ParseMode
 from telegram.error import NetworkError, TelegramError
 from telegram.ext import (
@@ -34,6 +34,9 @@ from telegram.ext import (
 from gentoogram import meta
 from gentoogram.config import config
 from gentoogram.decorators import admin, send_action
+
+if TYPE_CHECKING:
+    from telegram import Update, User
 
 logger = logging.getLogger(__name__)
 

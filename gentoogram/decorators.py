@@ -12,12 +12,15 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with gentoogram-bot.  If not, see <https://www.gnu.org/licenses/>.
+
 import logging
 from functools import wraps
+from typing import TYPE_CHECKING
 
-from telegram import Update
-from telegram.constants import ChatAction
-from telegram.ext import ContextTypes
+if TYPE_CHECKING:
+    from telegram import Update
+    from telegram.constants import ChatAction
+    from telegram.ext import ContextTypes
 
 from gentoogram.config import config
 
